@@ -215,7 +215,7 @@
         </div>
     </div>
 
-    <!-- MODALE PARRAINAGE (AVEC WHATSAPP) -->
+    <!-- MODALE PARRAINAGE -->
     <div id="referral-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative text-center">
             <button onclick="closeModal('referral-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -240,7 +240,7 @@
         </div>
     </div>
 
-    <!-- MODALE PARAMETRES & LANGUE -->
+    <!-- MODALE PARAMETRES -->
     <div id="settings-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal('settings-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -263,20 +263,18 @@
         </div>
     </div>
 
-    <!-- MODALE CHAT IA (ASSISTANT VIRTUEL) -->
+    <!-- MODALE CHAT IA -->
     <div id="ai-chat-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative flex flex-col h-[450px]">
             <button onclick="closeModal('ai-chat-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-bold text-lg mb-3 text-indigo-400 flex items-center space-x-2">
                 <i class="fa-solid fa-robot"></i> <span>Assistant IA - BOSSMAN Mada</span>
             </h3>
-            <!-- Zone des messages -->
             <div id="ai-chat-messages" class="flex-grow bg-gray-800/50 border border-gray-800 rounded-xl p-3 overflow-y-auto space-y-3 text-xs mb-3">
                 <div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300">
                     Manao ahoana! Salama tsara. Izaho no mpanampy IA anao eto amin'ny BOSSMAN Mada. Ahoana no ahafahako manampy anao androany? (Bonjour ! Je suis votre assistant IA sur BOSSMAN Mada. Comment puis-je vous aider ?)
                 </div>
             </div>
-            <!-- Formulaire d'envoi -->
             <form onsubmit="sendAIMessage(event)" class="flex space-x-2">
                 <input type="text" id="ai-input" placeholder="Posez votre question ici..." required class="flex-grow bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-xs font-bold transition">Envoyer</button>
@@ -291,7 +289,6 @@
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
         let currentLang = localStorage.getItem('bossman_lang') || 'fr';
 
-        // Dictionnaire des langues
         const translations = {
             fr: {
                 welcome: "BIENVENUE - Gagnez de l'argent en ligne facilement !",
@@ -453,14 +450,12 @@
             alert('Lien de parrainage copié !');
         }
 
-        // Partage direct sur WhatsApp avec le code parrainage
         function shareOnWhatsApp() {
             const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
             const text = encodeURIComponent(`Midira ao amin'ny BOSSMAN Mada! Reçois 2000Ar de bonus avec mon code ${currentUser.referralCode}. Lien : ${link}`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
-        // Mini conversation IA
         function sendAIMessage(e) {
             e.preventDefault();
             const inputField = document.getElementById('ai-input');
@@ -473,7 +468,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             setTimeout(() => {
-                let reply = "Misaotra tamin'ny fanontaniana. Raha mila vonjy momba ny depôt na retrait ianao dia mifandraisa amin'ny admin. (Merci pour votre question. Pour tout dépôt ou retrait, contactez l'admin.)";
+                let reply = "Misaotra tamin'ny fanontaniana. Raha mila vonjy momba ny depôt na retrait ianao dia mifandraisa amin'ny admin.";
                 const lower = msg.toLowerCase();
                 if(lower.includes('depot') || lower.includes('dépôt')) {
                     reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 (Manovo Hasambarana) ary andraso ny fankatoavan'ny admin.";
@@ -550,9 +545,10 @@
             alert(`Abonnement ${planId} activé avec succès !`);
         }
 
+        // ACCÈS ADMIN AVEC LE MOT DE PASSE "Hasamlegacy"
         function openAdminLogin() {
             const code = prompt('Entrez le mot de passe admin :');
-            if(code === 'admin123') {
+            if(code === 'Hasamlegacy') {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('admin-page').classList.remove('hidden');
                 loadAdminData();
