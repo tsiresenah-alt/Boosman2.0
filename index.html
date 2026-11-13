@@ -280,4 +280,451 @@
                 <i class="fa-solid fa-robot"></i> <span>Assistant IA - BOSSMAN Mada</span>
             </h3>
             <div id="ai-chat-messages" class="flex-grow bg-gray-800/50 border border-gray-800 rounded-xl p-3 overflow-y-auto space-y-3 text-xs mb-3">
-                <div class="bg-gray-800 p-2.5 rounded-
+                <div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300">
+                    Manao ahoana! Salama tsara. Izaho no mpanampy IA anao eto amin'ny BOSSMAN Mada. Ahoana no ahafahako manampy anao androany?
+                </div>
+            </div>
+            <form onsubmit="sendAIMessage(event)" class="flex space-x-2">
+                <input type="text" id="ai-input" placeholder="Posez votre question ici..." required class="flex-grow bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-xs font-bold transition">Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT JAVASCRIPT -->
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('bossman_current_user')) || null;
+        let users = JSON.parse(localStorage.getItem('bossman_users')) || [];
+        let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+        let currentLang = localStorage.getItem('bossman_lang') || 'fr';
+
+        const translations = {
+            fr: {
+                welcome: "BIENVENUE - Gagnez de l'argent en ligne facilement !",
+                settingsTitle: "Paramètres & Infos",
+                langLabel: "Choisir la langue / Fidy fiteny :"
+            },
+            mg: {
+                welcome: "TONGASOA SOA - Mahazoa vola an-tserasera mora foana !",
+                settingsTitle: "Fikirakirana & Fampahalalana",
+                langLabel: "Fidy fiteny :"
+            }
+        };
+
+        function applyLanguage() {
+            document.getElementById('language-selector').value = currentLang;
+            const t = translations[currentLang];
+            if(document.getElementById('txt-welcome')) document.getElementById('txt-welcome').textContent = t.welcome;
+            if(document.getElementById('set-title')) document.getElementById('set-title').textContent = t.settingsTitle;
+            if(document.getElementById('set-lang-label')) document.getElementById('set-lang-label').textContent = t.langLabel;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('bossman_lang', lang);
+            applyLanguage();
+            alert(lang === 'mg' ? 'Voafidy soa aman-tsara ny fiteny Malagasy.' : 'Langue française enregistrée avec succès.');
+        }
+
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = 587.33;
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        function switchTab(tab) {
+            if(tab === 'register') {
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('tab-register-btn').className = 'flex-1 pb-2 font-bold text-green-500 border-b-2 border-green-500';
+                document.getElementById('tab-login-btn').className = 'flex-1 pb-2 font-bold text-gray-400';
+            } else {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('tab-login-btn').className = 'flex-1 pb-2 font-bold text-blue-500 border-b-2 border-blue-500';
+                document.getElementById('tab-register-btn').className = 'flex-1 pb-2 font-bold text-gray-400';
+            }
+        }
+
+        function validatePassword(input) {
+            const feedback = document.getElementById('pass-feedback');
+            if(input.value.length < 6) {
+                input.classList.remove('border-green-500');
+                input.classList.add('border-red-500');
+                feedback.textContent = 'Le mot de passe doit contenir au moins 6 caractères.';
+                feedback.className = 'text-xs text-red-500 mt-1';
+            } else {
+                input.classList.remove('border-red-500');
+                input.classList.add('border-green-500');
+                feedback.textContent = 'Mot de passe valide.';
+                feedback.className = 'text-xs text-green-500 mt-1';
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if(pass.length < 6) return alert('Mot de passe trop court.');
+            if(users.some(u => u.phone === phone)) return alert('Ce numéro est déjà enregistré.');
+
+            const userIndex = users.length + 1;
+            const referralCode = `BOSSMAN-${String(userIndex).padStart(2, '0')}`;
+
+            const newUser = {
+                name,
+                phone,
+                pass,
+                balance: 2000,
+                referralCode,
+                activeSub: null,
+                history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
+            };
+
+            users.push(newUser);
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+
+            playNotificationSound();
+            alert('Inscription réussie ! Vous avez reçu 2 000 Ar de bonus.');
+            loginUser(newUser);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('log-phone').value;
+            const pass = document.getElementById('log-pass').value;
+
+            const user = users.find(u => u.phone === phone && u.pass === pass);
+            if(!user) return alert('Numéro ou mot de passe incorrect.');
+
+            loginUser(user);
+        }
+
+        function loginUser(user) {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('loader').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                currentUser = user;
+                localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+                updateDashboardUI();
+                document.getElementById('dashboard-page').classList.remove('hidden');
+            }, 2400);
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('bossman_current_user');
+            document.getElementById('dashboard-page').classList.add('hidden');
+            document.getElementById('auth-page').classList.remove('hidden');
+        }
+
+        function updateDashboardUI() {
+            if(!currentUser) return;
+            document.getElementById('dash-username').textContent = currentUser.name;
+            document.getElementById('dash-balance').textContent = currentUser.balance + ' Ar';
+            document.getElementById('ref-code-display').textContent = currentUser.referralCode;
+
+            const subBanner = document.getElementById('active-sub-banner');
+            if(currentUser.activeSub) {
+                subBanner.classList.remove('hidden');
+                document.getElementById('active-sub-name').innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${currentUser.activeSub.name} Actif</span>`;
+            } else {
+                subBanner.classList.add('hidden');
+            }
+            
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = currentUser.history.map(h => `
+                <div class="bg-gray-800 p-2.5 rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-white">${h.type}</p>
+                        <p class="text-[10px] text-gray-400">${h.date}</p>
+                    </div>
+                    <span class="font-bold ${h.amount > 0 ? 'text-green-400' : 'text-red-400'}">${h.amount > 0 ? '+' : ''}${h.amount} Ar</span>
+                </div>
+            `).join('') || '<p class="text-gray-500 text-center">Aucun historique</p>';
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openSettings() { openModal('settings-modal'); }
+
+        function copyReferralLink() {
+            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
+            navigator.clipboard.writeText(link);
+            alert('Lien de parrainage copié !');
+        }
+
+        function shareOnWhatsApp() {
+            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
+            const text = encodeURIComponent(`Midira ao amin'ny BOSSMAN Mada! Reçois 2000Ar de bonus avec mon code ${currentUser.referralCode}. Lien : ${link}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function sendAIMessage(e) {
+            e.preventDefault();
+            const inputField = document.getElementById('ai-input');
+            const msg = inputField.value.trim();
+            if(!msg) return;
+
+            const chatBox = document.getElementById('ai-chat-messages');
+            chatBox.innerHTML += `<div class="bg-indigo-600/30 p-2.5 rounded-lg max-w-[85%] ml-auto text-white"><strong>Ianao:</strong> ${msg}</div>`;
+            inputField.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "Misaotra tamin'ny fanontaniana. Raha mila vonjy momba ny depôt na retrait ianao dia mifandraisa amin'ny admin.";
+                const lower = msg.toLowerCase();
+                if(lower.includes('depot') || lower.includes('dépôt')) {
+                    reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 (Manovo Hasambarana) ary andraso ny fankatoavan'ny admin.";
+                } else if(lower.includes('retrait')) {
+                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar. Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
+                } else if(lower.includes('bonus')) {
+                    reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany!";
+                }
+
+                chatBox.innerHTML += `<div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300"><strong>IA:</strong> ${reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
+        }
+
+        function submitDeposit(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('dep-amount').value);
+            const phone = document.getElementById('dep-phone').value;
+            const ref = document.getElementById('dep-ref').value;
+
+            if(amount < 15000) return alert('Minimum dépôt est de 15 000 Ar.');
+
+            requests.push({
+                id: Date.now(),
+                type: 'Dépôt',
+                userPhone: currentUser.phone,
+                userName: currentUser.name,
+                amount,
+                phone,
+                ref,
+                status: 'En attente'
+            });
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+            closeModal('deposit-modal');
+            alert('Demande de dépôt soumise avec succès.');
+        }
+
+        function submitWithdraw(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('wit-amount').value);
+            const method = document.getElementById('wit-method').value;
+            const phone = document.getElementById('wit-phone').value;
+
+            if(amount < 3000) return alert('Minimum retrait est de 3 000 Ar.');
+            if(amount > currentUser.balance) return alert('Solde insuffisant.');
+
+            requests.push({
+                id: Date.now(),
+                type: 'Retrait',
+                userPhone: currentUser.phone,
+                userName: currentUser.name,
+                amount,
+                method,
+                phone,
+                status: 'En attente'
+            });
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+            closeModal('withdraw-modal');
+            alert('Demande de retrait soumise.');
+        }
+
+        // SOUSCRIPTION AVEC GESTION DU CONTRAT EN MINUTES ET TIMESTAMPS
+        function subscribe(planId, price, income, durationMinutes) {
+            if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
+            currentUser.balance -= price;
+            
+            const now = Date.now();
+            currentUser.activeSub = {
+                id: planId,
+                name: `Abonnement ${planId}`,
+                income: income,
+                expiresAt: now + (durationMinutes * 60 * 1000), // Fin totale du contrat
+                nextPayoutAt: now + (5 * 60 * 1000) // Prochain revenu dans 5 minutes
+            };
+
+            currentUser.history.push({type: `Achat Abonnement ${planId}`, amount: -price, date: new Date().toLocaleString()});
+            
+            saveUserData();
+            updateDashboardUI();
+            playNotificationSound();
+            alert(`Abonnement ${planId} activé avec succès pour ${durationMinutes} minutes !`);
+        }
+
+        function saveUserData() {
+            localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+            const idx = users.findIndex(u => u.phone === currentUser.phone);
+            if(idx !== -1) users[idx] = currentUser;
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+        }
+
+        // --- GESTION DES TIMERS EN TEMPS RÉEL (BASÉ SUR LES TIMESTAMPS) ---
+        let siteActiveSeconds = 0;
+
+        setInterval(() => {
+            if(!currentUser) return;
+            const now = Date.now();
+
+            // 1. Gestion de l'abonnement actif et du contrat
+            if(currentUser.activeSub) {
+                // Vérifier si le contrat global est terminé
+                if(now >= currentUser.activeSub.expiresAt) {
+                    currentUser.history.push({
+                        type: `Fin de contrat ${currentUser.activeSub.name}`,
+                        amount: 0,
+                        date: new Date().toLocaleString()
+                    });
+                    currentUser.activeSub = null;
+                    saveUserData();
+                    updateDashboardUI();
+                    alert("Votre abonnement est terminé ! Veuillez souscrire à un nouvel abonnement pour continuer à recevoir des revenus.");
+                } else {
+                    // Vérifier si c'est l'heure du versement du revenu (toutes les 5 minutes)
+                    if(now >= currentUser.activeSub.nextPayoutAt) {
+                        currentUser.balance += currentUser.activeSub.income;
+                        currentUser.history.push({
+                            type: `Revenu ${currentUser.activeSub.name}`,
+                            amount: currentUser.activeSub.income,
+                            date: new Date().toLocaleString()
+                        });
+                        // Planifier le prochain versement 5 minutes plus tard (sans dépasser la fin du contrat)
+                        currentUser.activeSub.nextPayoutAt = Math.min(now + (5 * 60 * 1000), currentUser.activeSub.expiresAt);
+                        saveUserData();
+                        updateDashboardUI();
+                        playNotificationSound();
+                    }
+
+                    // Calculer le temps restant exact pour l'affichage (ne se réinitialise plus lors d'un rafraîchissement)
+                    let timeLeft = Math.floor((currentUser.activeSub.nextPayoutAt - now) / 1000);
+                    if(timeLeft < 0) timeLeft = 0;
+                    let m = Math.floor(timeLeft / 60);
+                    let s = timeLeft % 60;
+                    let timerDisplay = document.getElementById('sub-timer');
+                    if(timerDisplay) {
+                        timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                    }
+                }
+            }
+
+            // 2. Bonus de présence active sur le site (5 minutes = 300 secondes)
+            siteActiveSeconds++;
+            if(siteActiveSeconds >= 300) {
+                siteActiveSeconds = 0;
+                currentUser.balance += 3;
+                currentUser.history.push({
+                    type: 'Bonus d’activité (5 min)',
+                    amount: 3,
+                    date: new Date().toLocaleString()
+                });
+                saveUserData();
+                updateDashboardUI();
+                playNotificationSound();
+            }
+        }, 1000);
+
+        // ACCÈS ADMIN
+        function openAdminLogin() {
+            const code = prompt('Entrez le mot de passe admin :');
+            if(code && code.trim() === 'Hasamlegacy') {
+                document.getElementById('auth-page').classList.add('hidden');
+                document.getElementById('admin-page').classList.remove('hidden');
+                loadAdminData();
+            } else if(code !== null) {
+                alert('Mot de passe incorrect.');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-page').classList.add('hidden');
+            document.getElementById('auth-page').classList.remove('hidden');
+        }
+
+        function loadAdminData() {
+            const usersList = document.getElementById('admin-users-list');
+            usersList.innerHTML = users.map(u => `
+                <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-white">${u.name} (${u.phone})</p>
+                        <p class="text-gray-400">Solde: ${u.balance} Ar ${u.activeSub ? '| <span class="text-green-400">Sub Actif</span>' : ''}</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-gray-500">Aucun utilisateur</p>';
+
+            const reqList = document.getElementById('admin-requests-list');
+            reqList.innerHTML = requests.map(r => `
+                <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-white">${r.type} - ${r.userName}: <span class="text-green-400">${r.amount} Ar</span></p>
+                        <p class="text-gray-400 text-[10px]">Statut: ${r.status}</p>
+                    </div>
+                    ${r.status === 'En attente' ? `
+                        <div class="space-x-1">
+                            <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 px-2 py-1 rounded text-white font-bold">Valider</button>
+                            <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 px-2 py-1 rounded text-white font-bold">Refuser</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('') || '<p class="text-gray-500">Aucune demande</p>';
+        }
+
+        function handleRequest(id, action) {
+            const req = requests.find(r => r.id === id);
+            if(!req) return;
+            const targetUser = users.find(u => u.phone === req.userPhone);
+
+            if(action === 'Valider') {
+                req.status = 'Validé (Vert)';
+                if(req.type === 'Dépôt' && targetUser) {
+                    targetUser.balance += req.amount;
+                    targetUser.history.push({type: 'Dépôt approuvé', amount: req.amount, date: new Date().toLocaleString()});
+                } else if(req.type === 'Retrait' && targetUser) {
+                    targetUser.balance -= req.amount;
+                    targetUser.history.push({type: 'Retrait approuvé', amount: -req.amount, date: new Date().toLocaleString()});
+                }
+            } else {
+                req.status = 'Refusé (Rouge)';
+            }
+
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+
+            if(currentUser && targetUser && currentUser.phone === targetUser.phone) {
+                currentUser = targetUser;
+                localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+                updateDashboardUI();
+            }
+
+            loadAdminData();
+            playNotificationSound();
+        }
+
+        window.onload = function() {
+            applyLanguage();
+            if(currentUser) {
+                document.getElementById('auth-page').classList.add('hidden');
+                document.getElementById('dashboard-page').classList.remove('hidden');
+                updateDashboardUI();
+            }
+        };
+    </script>
+</body>
+</html>
