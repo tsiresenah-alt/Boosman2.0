@@ -20,17 +20,13 @@
             50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
-        .blinking-logo {
-            animation: blinkColors 2s infinite;
-        }
-        .blinking-red {
-            animation: blinkRed 1s infinite;
-        }
+        .blinking-logo { animation: blinkColors 2s infinite; }
+        .blinking-red { animation: blinkRed 1s infinite; }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between">
 
-    <!-- Bannière de mise à jour (Admin control) -->
+    <!-- Bannière de mise à jour -->
     <div id="update-banner" class="bg-red-600 text-center py-2 font-bold text-sm hidden blinking-red">
         L'ADMIN EST EN TRAIN DE FAIRE UNE MISE À JOUR
     </div>
@@ -38,20 +34,19 @@
     <!-- CONTENEUR PRINCIPAL -->
     <div id="app" class="flex-grow flex flex-col items-center justify-center p-4">
         
-        <!-- PAGE 1: AUTHENTIFICATION (CONNEXION / INSCRIPTION) -->
+        <!-- PAGE 1: AUTHENTIFICATION -->
         <div id="auth-page" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
             <div class="text-center mb-6">
                 <h1 class="text-3xl font-black tracking-wider blinking-logo mb-2">BOSSMAN Mada</h1>
-                <p class="text-gray-400 text-sm">BIENVENUE - Gagnez de l'argent en ligne facilement !</p>
+                <p id="txt-welcome" class="text-gray-400 text-sm">BIENVENUE - Gagnez de l'argent en ligne facilement !</p>
             </div>
 
-            <!-- Onglets Inscription / Connexion -->
             <div class="flex border-b border-gray-800 mb-6">
                 <button onclick="switchTab('register')" id="tab-register-btn" class="flex-1 pb-2 font-bold text-green-500 border-b-2 border-green-500">Inscription</button>
                 <button onclick="switchTab('login')" id="tab-login-btn" class="flex-1 pb-2 font-bold text-gray-400">Connexion</button>
             </div>
 
-            <!-- Formulaire d'inscription -->
+            <!-- Inscription -->
             <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs uppercase text-gray-400 mb-1">Nom d'utilisateur</label>
@@ -69,7 +64,7 @@
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 font-bold py-3 rounded-lg transition">S'inscrire (+2 000 Ar Bonus)</button>
             </form>
 
-            <!-- Formulaire de connexion -->
+            <!-- Connexion -->
             <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs uppercase text-gray-400 mb-1">Numéro de téléphone</label>
@@ -87,13 +82,13 @@
             </div>
         </div>
 
-        <!-- ANIMATION DE CHARGEMENT -->
+        <!-- LOADER -->
         <div id="loader" class="hidden flex flex-col items-center justify-center space-y-4">
             <div class="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-green-400 font-semibold text-lg">Chargement en cours...</p>
         </div>
 
-        <!-- PAGE 2: TABLEAU DE BORD UTILISATEUR -->
+        <!-- PAGE 2: TABLEAU DE BORD -->
         <div id="dashboard-page" class="w-full max-w-2xl bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl hidden">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
                 <div>
@@ -101,6 +96,9 @@
                     <p class="text-sm text-gray-400">Solde: <span id="dash-balance" class="text-green-400 font-bold">0 Ar</span></p>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <button onclick="openModal('ai-chat-modal')" class="bg-indigo-600/20 hover:bg-indigo-600/40 p-2.5 rounded-full text-indigo-400 transition" title="Assistant IA">
+                        <i class="fa-solid fa-robot"></i>
+                    </button>
                     <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 p-2.5 rounded-full text-gray-300 transition" title="Paramètres">
                         <i class="fa-solid fa-gear"></i>
                     </button>
@@ -130,7 +128,7 @@
                 </button>
             </div>
 
-            <!-- Liste des Abonnements -->
+            <!-- Abonnements -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
@@ -139,7 +137,7 @@
                         <p class="text-xs text-gray-400">Durée : 35 jours | Revenu auto: 1 000 Ar / 2 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 15 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(1, 15000, 35, 2, 1000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(1, 15000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
@@ -147,7 +145,7 @@
                         <p class="text-xs text-gray-400">Durée : 30 jours | Revenu auto: 1 500 Ar / 2 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 25 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(2, 25000, 30, 2, 1500)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(2, 25000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
@@ -155,18 +153,17 @@
                         <p class="text-xs text-gray-400">Durée : 31 jours | Revenu auto: 3 000 Ar / 3 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 40 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(3, 40000, 31, 3, 3000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(3, 40000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
             </div>
         </div>
 
-        <!-- PANNEAU ADMINISTRATEUR -->
+        <!-- ADMIN -->
         <div id="admin-page" class="w-full max-w-4xl bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl hidden">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
                 <h2 class="text-xl font-bold text-red-500"><i class="fa-solid fa-shield-halved"></i> Tableau de bord Admin</h2>
                 <button onclick="logoutAdmin()" class="bg-gray-800 px-3 py-1 rounded text-sm">Quitter Admin</button>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-800 p-4 rounded-xl">
                     <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits</h3>
@@ -180,7 +177,7 @@
         </div>
     </div>
 
-    <!-- MODALES -->
+    <!-- MODALE DEPOT -->
     <div id="deposit-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal('deposit-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -200,6 +197,7 @@
         </div>
     </div>
 
+    <!-- MODALE RETRAIT -->
     <div id="withdraw-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal('withdraw-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -217,16 +215,23 @@
         </div>
     </div>
 
+    <!-- MODALE PARRAINAGE (AVEC WHATSAPP) -->
     <div id="referral-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative text-center">
             <button onclick="closeModal('referral-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-bold text-lg mb-2 text-yellow-400">Parrainage</h3>
             <p class="text-xs text-gray-400 mb-4">Invitez vos amis avec votre code unique :</p>
             <div class="bg-gray-800 p-3 rounded-lg font-mono text-lg text-green-400 font-bold mb-4" id="ref-code-display">BOSSMAN-01</div>
-            <button onclick="copyReferralLink()" class="w-full bg-yellow-600 hover:bg-yellow-500 font-bold py-2.5 rounded-lg text-sm text-black transition">Copier le lien</button>
+            <div class="space-y-2">
+                <button onclick="copyReferralLink()" class="w-full bg-yellow-600 hover:bg-yellow-500 font-bold py-2.5 rounded-lg text-sm text-black transition">Copier le lien</button>
+                <button onclick="shareOnWhatsApp()" class="w-full bg-green-500 hover:bg-green-400 font-bold py-2.5 rounded-lg text-sm text-white transition flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> <span>Partager sur WhatsApp</span>
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- MODALE HISTORIQUE -->
     <div id="history-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal('history-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -235,14 +240,21 @@
         </div>
     </div>
 
+    <!-- MODALE PARAMETRES & LANGUE -->
     <div id="settings-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative">
             <button onclick="closeModal('settings-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="font-bold text-lg mb-4 text-gray-200">Paramètres & Infos</h3>
-            <div class="space-y-3 text-xs text-gray-300 mb-6">
+            <h3 id="set-title" class="font-bold text-lg mb-4 text-gray-200">Paramètres & Infos</h3>
+            <div class="space-y-4 text-xs text-gray-300 mb-6">
+                <div>
+                    <label id="set-lang-label" class="block font-semibold mb-1 text-gray-400">Choisir la langue / Fidy fiteny :</label>
+                    <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white">
+                        <option value="fr">Français</option>
+                        <option value="mg">Malgache (Malagasy)</option>
+                    </select>
+                </div>
                 <p><strong>Nom du site :</strong> BOSSMAN Mada</p>
-                <p><strong>Aide IA :</strong> Support actif 24/7 pour vos questions.</p>
-                <p><strong>Langue :</strong> Malgache (Malagasy) / Français</p>
+                <p id="set-ai-info"><strong>Aide IA :</strong> Support actif 24/7 pour vos questions.</p>
             </div>
             <div class="border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
                 <p>Créé par <span class="text-white font-semibold">Manovo Hasambarana</span></p>
@@ -251,11 +263,62 @@
         </div>
     </div>
 
+    <!-- MODALE CHAT IA (ASSISTANT VIRTUEL) -->
+    <div id="ai-chat-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative flex flex-col h-[450px]">
+            <button onclick="closeModal('ai-chat-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="font-bold text-lg mb-3 text-indigo-400 flex items-center space-x-2">
+                <i class="fa-solid fa-robot"></i> <span>Assistant IA - BOSSMAN Mada</span>
+            </h3>
+            <!-- Zone des messages -->
+            <div id="ai-chat-messages" class="flex-grow bg-gray-800/50 border border-gray-800 rounded-xl p-3 overflow-y-auto space-y-3 text-xs mb-3">
+                <div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300">
+                    Manao ahoana! Salama tsara. Izaho no mpanampy IA anao eto amin'ny BOSSMAN Mada. Ahoana no ahafahako manampy anao androany? (Bonjour ! Je suis votre assistant IA sur BOSSMAN Mada. Comment puis-je vous aider ?)
+                </div>
+            </div>
+            <!-- Formulaire d'envoi -->
+            <form onsubmit="sendAIMessage(event)" class="flex space-x-2">
+                <input type="text" id="ai-input" placeholder="Posez votre question ici..." required class="flex-grow bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-xs font-bold transition">Envoyer</button>
+            </form>
+        </div>
+    </div>
+
     <!-- SCRIPT JAVASCRIPT -->
     <script>
         let currentUser = JSON.parse(localStorage.getItem('bossman_current_user')) || null;
         let users = JSON.parse(localStorage.getItem('bossman_users')) || [];
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+        let currentLang = localStorage.getItem('bossman_lang') || 'fr';
+
+        // Dictionnaire des langues
+        const translations = {
+            fr: {
+                welcome: "BIENVENUE - Gagnez de l'argent en ligne facilement !",
+                settingsTitle: "Paramètres & Infos",
+                langLabel: "Choisir la langue / Fidy fiteny :"
+            },
+            mg: {
+                welcome: "TONGASOA SOA - Mahazoa vola an-tserasera mora foana !",
+                settingsTitle: "Fikirakirana & Fampahalalana",
+                langLabel: "Fidy fiteny :"
+            }
+        };
+
+        function applyLanguage() {
+            document.getElementById('language-selector').value = currentLang;
+            const t = translations[currentLang];
+            if(document.getElementById('txt-welcome')) document.getElementById('txt-welcome').textContent = t.welcome;
+            if(document.getElementById('set-title')) document.getElementById('set-title').textContent = t.settingsTitle;
+            if(document.getElementById('set-lang-label')) document.getElementById('set-lang-label').textContent = t.langLabel;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('bossman_lang', lang);
+            applyLanguage();
+            alert(lang === 'mg' ? 'Voafidy soa aman-tsara ny fiteny Malagasy.' : 'Langue française enregistrée avec succès.');
+        }
 
         function playNotificationSound() {
             try {
@@ -287,7 +350,6 @@
             }
         }
 
-        // CORRECTION DE LA VALIDATION DU MOT DE PASSE (Passe en vert si >= 6 caractères)
         function validatePassword(input) {
             const feedback = document.getElementById('pass-feedback');
             if(input.value.length < 6) {
@@ -386,8 +448,44 @@
         function openSettings() { openModal('settings-modal'); }
 
         function copyReferralLink() {
-            navigator.clipboard.writeText(window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode);
+            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
+            navigator.clipboard.writeText(link);
             alert('Lien de parrainage copié !');
+        }
+
+        // Partage direct sur WhatsApp avec le code parrainage
+        function shareOnWhatsApp() {
+            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
+            const text = encodeURIComponent(`Midira ao amin'ny BOSSMAN Mada! Reçois 2000Ar de bonus avec mon code ${currentUser.referralCode}. Lien : ${link}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        // Mini conversation IA
+        function sendAIMessage(e) {
+            e.preventDefault();
+            const inputField = document.getElementById('ai-input');
+            const msg = inputField.value.trim();
+            if(!msg) return;
+
+            const chatBox = document.getElementById('ai-chat-messages');
+            chatBox.innerHTML += `<div class="bg-indigo-600/30 p-2.5 rounded-lg max-w-[85%] ml-auto text-white"><strong>Ianao:</strong> ${msg}</div>`;
+            inputField.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "Misaotra tamin'ny fanontaniana. Raha mila vonjy momba ny depôt na retrait ianao dia mifandraisa amin'ny admin. (Merci pour votre question. Pour tout dépôt ou retrait, contactez l'admin.)";
+                const lower = msg.toLowerCase();
+                if(lower.includes('depot') || lower.includes('dépôt')) {
+                    reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 (Manovo Hasambarana) ary andraso ny fankatoavan'ny admin.";
+                } else if(lower.includes('retrait')) {
+                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar. Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
+                } else if(lower.includes('bonus')) {
+                    reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany!";
+                }
+
+                chatBox.innerHTML += `<div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300"><strong>IA:</strong> ${reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
         }
 
         function submitDeposit(e) {
@@ -410,7 +508,7 @@
             });
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
             closeModal('deposit-modal');
-            alert('Demande de dépôt soumise avec succès. En attente d\'approbation admin.');
+            alert('Demande de dépôt soumise avec succès.');
         }
 
         function submitWithdraw(e) {
@@ -434,10 +532,10 @@
             });
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
             closeModal('withdraw-modal');
-            alert('Demande de retrait soumise. En attente d\'approbation admin.');
+            alert('Demande de retrait soumise.');
         }
 
-        function subscribe(planId, price, days, intervalDays, income) {
+        function subscribe(planId, price) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
             currentUser.history.push({type: `Achat Abonnement ${planId}`, amount: -price, date: new Date().toLocaleString()});
@@ -528,6 +626,7 @@
         }
 
         window.onload = function() {
+            applyLanguage();
             if(currentUser) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('dashboard-page').classList.remove('hidden');
