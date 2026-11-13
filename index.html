@@ -109,7 +109,7 @@
             </div>
 
             <!-- Actions Rapides -->
-            <div class="grid grid-cols-4 gap-3 mb-6">
+            <div class="grid grid-cols-4 gap-3 mb-4">
                 <button onclick="openModal('deposit-modal')" class="bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center transition">
                     <i class="fa-solid fa-wallet text-green-400 text-xl mb-1"></i>
                     <span class="text-xs">Dépôt</span>
@@ -128,32 +128,45 @@
                 </button>
             </div>
 
+            <!-- BLOC ABONNEMENT ACTIF (Affiché en bas des icônes si actif) -->
+            <div id="active-sub-banner" class="hidden bg-gradient-to-r from-green-900/40 to-emerald-900/40 border border-green-600/50 p-4 rounded-xl mb-6 flex justify-between items-center">
+                <div>
+                    <h4 id="active-sub-name" class="font-bold text-green-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-check"></i> <span>Abonnement Actif</span>
+                    </h4>
+                    <p class="text-xs text-gray-300 mt-1">Prochain revenu automatique dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400">05:00</span></p>
+                </div>
+                <div class="text-right">
+                    <span class="inline-block bg-green-600/30 text-green-300 text-[10px] font-bold px-2.5 py-1 rounded-full blinking-red">Actif en cours</span>
+                </div>
+            </div>
+
             <!-- Abonnements -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
                         <h4 class="font-bold text-green-400">Abonnement 1</h4>
-                        <p class="text-xs text-gray-400">Durée : 35 jours | Revenu auto: 1 000 Ar / 2 jours</p>
+                        <p class="text-xs text-gray-400">Durée : 35 jours | Revenu auto: 1 000 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 15 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(1, 15000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(1, 15000, 1000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
                         <h4 class="font-bold text-green-400">Abonnement 2</h4>
-                        <p class="text-xs text-gray-400">Durée : 30 jours | Revenu auto: 1 500 Ar / 2 jours</p>
+                        <p class="text-xs text-gray-400">Durée : 30 jours | Revenu auto: 1 500 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 25 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(2, 25000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(2, 25000, 1500)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
                         <h4 class="font-bold text-green-400">Abonnement 3</h4>
-                        <p class="text-xs text-gray-400">Durée : 31 jours | Revenu auto: 3 000 Ar / 3 jours</p>
+                        <p class="text-xs text-gray-400">Durée : 31 jours | Revenu auto: 3 000 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 40 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(3, 40000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(3, 40000, 3000)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
             </div>
         </div>
@@ -272,7 +285,7 @@
             </h3>
             <div id="ai-chat-messages" class="flex-grow bg-gray-800/50 border border-gray-800 rounded-xl p-3 overflow-y-auto space-y-3 text-xs mb-3">
                 <div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300">
-                    Manao ahoana! Salama tsara. Izaho no mpanampy IA anao eto amin'ny BOSSMAN Mada. Ahoana no ahafahako manampy anao androany? (Bonjour ! Je suis votre assistant IA sur BOSSMAN Mada. Comment puis-je vous aider ?)
+                    Manao ahoana! Salama tsara. Izaho no mpanampy IA anao eto amin'ny BOSSMAN Mada. Ahoana no ahafahako manampy anao androany?
                 </div>
             </div>
             <form onsubmit="sendAIMessage(event)" class="flex space-x-2">
@@ -288,6 +301,10 @@
         let users = JSON.parse(localStorage.getItem('bossman_users')) || [];
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
         let currentLang = localStorage.getItem('bossman_lang') || 'fr';
+
+        // Timer global pour les abonnements et l'activité (en secondes : 5 min = 300 secondes)
+        const SUB_INTERVAL = 300; 
+        const ACTIVE_INTERVAL = 300;
 
         const translations = {
             fr: {
@@ -380,6 +397,7 @@
                 pass,
                 balance: 2000,
                 referralCode,
+                activeSub: null,
                 history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
             };
 
@@ -409,6 +427,9 @@
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
                 currentUser = user;
+                if(currentUser.activeSub && !currentUser.activeSub.timer) {
+                    currentUser.activeSub.timer = SUB_INTERVAL;
+                }
                 localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
                 updateDashboardUI();
                 document.getElementById('dashboard-page').classList.remove('hidden');
@@ -427,6 +448,15 @@
             document.getElementById('dash-username').textContent = currentUser.name;
             document.getElementById('dash-balance').textContent = currentUser.balance + ' Ar';
             document.getElementById('ref-code-display').textContent = currentUser.referralCode;
+
+            // Gestion de l'affichage de l'abonnement actif
+            const subBanner = document.getElementById('active-sub-banner');
+            if(currentUser.activeSub) {
+                subBanner.classList.remove('hidden');
+                document.getElementById('active-sub-name').innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${currentUser.activeSub.name} Actif</span>`;
+            } else {
+                subBanner.classList.add('hidden');
+            }
             
             const historyList = document.getElementById('history-list');
             historyList.innerHTML = currentUser.history.map(h => `
@@ -530,25 +560,85 @@
             alert('Demande de retrait soumise.');
         }
 
-        function subscribe(planId, price) {
+        function subscribe(planId, price, income) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
-            currentUser.history.push({type: `Achat Abonnement ${planId}`, amount: -price, date: new Date().toLocaleString()});
-            localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
             
-            const idx = users.findIndex(u => u.phone === currentUser.phone);
-            if(idx !== -1) users[idx] = currentUser;
-            localStorage.setItem('bossman_users', JSON.stringify(users));
+            // Activer l'abonnement avec un timer de 5 minutes (300 secondes)
+            currentUser.activeSub = {
+                id: planId,
+                name: `Abonnement ${planId}`,
+                income: income,
+                timer: SUB_INTERVAL
+            };
 
+            currentUser.history.push({type: `Achat Abonnement ${planId}`, amount: -price, date: new Date().toLocaleString()});
+            
+            saveUserData();
             updateDashboardUI();
             playNotificationSound();
             alert(`Abonnement ${planId} activé avec succès !`);
         }
 
-        // ACCÈS ADMIN AVEC LE MOT DE PASSE "Hasamlegacy"
+        function saveUserData() {
+            localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+            const idx = users.findIndex(u => u.phone === currentUser.phone);
+            if(idx !== -1) users[idx] = currentUser;
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+        }
+
+        // --- GESTION DES TIMERS EN TEMPS RÉEL (5 MINUTES) ---
+        let siteActiveSeconds = 0;
+
+        setInterval(() => {
+            if(!currentUser) return;
+
+            // 1. Gestion du compte à rebours de l'abonnement actif
+            if(currentUser.activeSub) {
+                currentUser.activeSub.timer--;
+                
+                let m = Math.floor(currentUser.activeSub.timer / 60);
+                let s = currentUser.activeSub.timer % 60;
+                let timerDisplay = document.getElementById('sub-timer');
+                if(timerDisplay) {
+                    timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                }
+
+                // Lorsque les 5 minutes sont écoulées pour l'abonnement
+                if(currentUser.activeSub.timer <= 0) {
+                    currentUser.balance += currentUser.activeSub.income;
+                    currentUser.history.push({
+                        type: `Revenu ${currentUser.activeSub.name}`,
+                        amount: currentUser.activeSub.income,
+                        date: new Date().toLocaleString()
+                    });
+                    currentUser.activeSub.timer = SUB_INTERVAL; // Relancer pour 5 min
+                    saveUserData();
+                    updateDashboardUI();
+                    playNotificationSound();
+                }
+            }
+
+            // 2. Bonus de présence active sur le site (5 minutes = 300 secondes)
+            siteActiveSeconds++;
+            if(siteActiveSeconds >= ACTIVE_INTERVAL) {
+                siteActiveSeconds = 0;
+                currentUser.balance += 3;
+                currentUser.history.push({
+                    type: 'Bonus d’activité (5 min)',
+                    amount: 3,
+                    date: new Date().toLocaleString()
+                });
+                saveUserData();
+                updateDashboardUI();
+                playNotificationSound();
+            }
+        }, 1000);
+
+        // ACCÈS ADMIN
         function openAdminLogin() {
             const code = prompt('Entrez le mot de passe admin :');
-            if(code === 'Hasamlegacy') {
+            if(code && code.trim() === 'Hasamlegacy') {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('admin-page').classList.remove('hidden');
                 loadAdminData();
@@ -568,7 +658,7 @@
                 <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
                     <div>
                         <p class="font-bold text-white">${u.name} (${u.phone})</p>
-                        <p class="text-gray-400">Solde: ${u.balance} Ar</p>
+                        <p class="text-gray-400">Solde: ${u.balance} Ar ${u.activeSub ? '| <span class="text-green-400">Sub Actif</span>' : ''}</p>
                     </div>
                 </div>
             `).join('') || '<p class="text-gray-500">Aucun utilisateur</p>';
@@ -626,6 +716,7 @@
             if(currentUser) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('dashboard-page').classList.remove('hidden');
+                if(!currentUser.activeSub) currentUser.activeSub = null;
                 updateDashboardUI();
             }
         };
