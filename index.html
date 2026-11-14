@@ -101,7 +101,7 @@
                 <div class="flex items-center space-x-3">
                     <button onclick="openModal('support-chat-modal')" class="relative bg-red-600/20 hover:bg-red-600/40 p-2.5 rounded-full text-red-400 transition" title="Support Admin">
                         <i class="fa-solid fa-headset"></i>
-                        <span id="user-msg-badge" class="hidden absolute -top-1 -right-1 bg-red-600 w-2.5 h-2.5 rounded-full blinking-red"></span>
+                        <span id="user-msg-badge" class="hidden absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full blinking-red">0</span>
                     </button>
                     <button onclick="openModal('ai-chat-modal')" class="bg-indigo-600/20 hover:bg-indigo-600/40 p-2.5 rounded-full text-indigo-400 transition" title="Assistant IA">
                         <i class="fa-solid fa-robot"></i>
@@ -427,11 +427,15 @@
 
             if(currentUser) {
                 messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
-                const userUnread = messages.some(m => m.userPhone === currentUser.phone && m.sender === 'admin' && !m.read);
+                const userUnreadMsgs = messages.filter(m => m.userPhone === currentUser.phone && m.sender === 'admin' && !m.read).length;
                 const userMsgBadge = document.getElementById('user-msg-badge');
                 if(userMsgBadge) {
-                    if(userUnread) userMsgBadge.classList.remove('hidden');
-                    else userMsgBadge.classList.add('hidden');
+                    if(userUnreadMsgs > 0) {
+                        userMsgBadge.textContent = userUnreadMsgs;
+                        userMsgBadge.classList.remove('hidden');
+                    } else {
+                        userMsgBadge.classList.add('hidden');
+                    }
                 }
             }
         }
@@ -588,7 +592,6 @@
             document.getElementById(id).classList.remove('hidden'); 
             if(id === 'support-chat-modal') {
                 loadUserSupportChat();
-                // Marquer messages admin comme lus
                 messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
                 messages.forEach(m => {
                     if(m.userPhone === currentUser.phone && m.sender === 'admin') m.read = true;
@@ -861,7 +864,6 @@
 
         function loadAdminData() {
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
-            // Marquer tous les messages comme lus pour l'admin
             messages.forEach(m => m.read = true);
             localStorage.setItem('bossman_messages', JSON.stringify(messages));
             refreshAdminBadge();
