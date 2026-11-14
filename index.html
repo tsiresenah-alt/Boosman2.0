@@ -235,7 +235,7 @@
                 <input type="number" id="dep-amount" placeholder="Montant (ex: 15000)" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
                 <input type="tel" id="dep-phone" placeholder="Votre numéro expéditeur" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
                 <input type="text" id="dep-ref" placeholder="Référence SMS transfert" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
-                <input type="file" id="dep-proof" required class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-green-400 hover:file:bg-gray-700">
+                <input type="file" id="dep-proof" accept="image/*" required class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-green-400 hover:file:bg-gray-700">
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 font-bold py-2.5 rounded-lg text-sm transition">Soumettre le Dépôt</button>
             </form>
         </div>
@@ -575,24 +575,32 @@
             const phone = document.getElementById('dep-phone').value;
             const ref = document.getElementById('dep-ref').value;
             const proofInput = document.getElementById('dep-proof');
-            const proofFileName = proofInput.files && proofInput.files[0] ? proofInput.files[0].name : 'Justificatif.jpg';
-
+            
             if(amount < 15000) return alert('Minimum dépôt est de 15 000 Ar.');
 
-            requests.push({
-                id: Date.now(),
-                type: 'Dépôt',
-                userPhone: currentUser.phone,
-                userName: currentUser.name,
-                amount,
-                phone,
-                ref,
-                proofFileName,
-                status: 'En attente'
-            });
-            localStorage.setItem('bossman_requests', JSON.stringify(requests));
-            closeModal('deposit-modal');
-            alert('Demande de dépôt soumise avec succès.');
+            const file = proofInput.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    const proofDataUrl = uploadEvent.target.result;
+                    requests.push({
+                        id: Date.now(),
+                        type: 'Dépôt',
+                        userPhone: currentUser.phone,
+                        userName: currentUser.name,
+                        amount,
+                        phone,
+                        ref,
+                        proofFileName: file.name,
+                        proofDataUrl: proofDataUrl,
+                        status: 'En attente'
+                    });
+                    localStorage.setItem('bossman_requests', JSON.stringify(requests));
+                    closeModal('deposit-modal');
+                    alert('Demande de dépôt soumise avec succès.');
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function submitWithdraw(e) {
@@ -756,7 +764,7 @@
                         <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
                             <p>📞 Tél expéditeur : <span class="text-orange-400 font-bold">${r.phone}</span></p>
                             <p>🔢 Référence SMS : <span class="text-yellow-400 font-bold">${r.ref}</span></p>
-                            <p>🖼️ Fichier/Image : <span class="text-indigo-400">${r.proofFileName || 'Justificatif.jpg'}</span></p>
+                            <p>🖼️ Fichier/Image : ${r.proofDataUrl ? `<a href="${r.proofDataUrl}" target="_blank" class="text-indigo-400 underline font-semibold hover:text-indigo-300">${r.proofFileName || 'Voir l’image'} (Cliquer pour ouvrir)</a>` : `<span class="text-gray-400">${r.proofFileName || 'Justificatif.jpg'}</span>`}</p>
                         </div>
                     ` : r.type === 'Retrait' ? `
                         <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
