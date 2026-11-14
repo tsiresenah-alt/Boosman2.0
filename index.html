@@ -313,7 +313,6 @@
         </div>
     </div>
 
-    <!-- AUTRES MODALES -->
     <!-- MODALE SUPPORT CHAT AVEC ONGLET DE FORMULAIRE DE DÉPÔT INTÉGRÉ -->
     <div id="support-chat-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative flex flex-col h-[550px] shadow-2xl">
@@ -355,6 +354,7 @@
         </div>
     </div>
 
+    <!-- MODALE DÉPÔT CLASSIQUE -->
     <div id="deposit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button type="button" onclick="closeModal('deposit-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -402,6 +402,7 @@
         </div>
     </div>
 
+    <!-- MODALE PARRAINAGE -->
     <div id="referral-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative text-center shadow-2xl">
             <button type="button" onclick="closeModal('referral-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -419,6 +420,7 @@
         </div>
     </div>
 
+    <!-- MODALE HISTORIQUE -->
     <div id="history-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button type="button" onclick="closeModal('history-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -1182,7 +1184,6 @@
                     });
                     localStorage.setItem('bossman_requests', JSON.stringify(requests));
                     
-                    // Ajouter également dans le chat
                     messages.push({
                         id: Date.now() + 1,
                         userPhone: currentUser.phone,
@@ -1261,7 +1262,7 @@
             currentUser.balance -= price;
             
             const now = Date.now();
-            const durationMs = durationDays * 24 * 60 * 1000; 
+            const durationMs = durationDays * 24 * 60 * 60 * 1000; 
             const payoutIntervalMs = payoutDaysInterval * 24 * 60 * 1000;
 
             currentUser.activeSub = {
