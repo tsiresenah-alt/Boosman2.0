@@ -142,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- 5 Abonnements configurés -->
+            <!-- 5 Abonnements -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
                 <!-- Abonnement 1 -->
@@ -218,10 +218,19 @@
             <button onclick="closeModal('deposit-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-bold text-lg mb-2 text-green-400">Faire un Dépôt</h3>
             <p class="text-red-500 text-xs blinking-red font-semibold mb-4">Minimum dépôt 15000ar - Minimum retrait 3000ar</p>
-            <div class="bg-gray-800 p-3 rounded-lg mb-4 text-xs">
-                <p class="text-gray-300 font-semibold">Numéro Orange Money : <span class="text-green-400">0371897870</span></p>
-                <p class="text-gray-300 font-semibold">Nom : <span class="text-green-400">Manovo Hasambarana</span></p>
+            
+            <!-- Orange Money (Orange) -->
+            <div class="bg-gray-800 p-3 rounded-lg mb-3 text-xs border border-orange-500/30">
+                <p class="text-gray-300 font-semibold">Numéro Orange Money : <span class="text-orange-500 font-bold">0371897870</span></p>
+                <p class="text-gray-300 font-semibold">Nom : <span class="text-orange-500 font-bold">Manovo Hasambarana</span></p>
             </div>
+
+            <!-- Airtel Money (Rouge) -->
+            <div class="bg-gray-800 p-3 rounded-lg mb-4 text-xs border border-red-500/30">
+                <p class="text-gray-300 font-semibold">Numéro Airtel Money : <span class="text-red-500 font-bold">0336181891</span></p>
+                <p class="text-gray-300 font-semibold">Nom : <span class="text-red-500 font-bold">Riantso Soloniaina</span></p>
+            </div>
+
             <form onsubmit="submitDeposit(event)" class="space-y-3">
                 <input type="number" id="dep-amount" placeholder="Montant (ex: 15000)" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
                 <input type="tel" id="dep-phone" placeholder="Votre numéro expéditeur" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
@@ -548,7 +557,7 @@
                 let reply = "Misaotra tamin'ny fanontaniana. Raha mila vonjy momba ny depôt na retrait ianao dia mifandraisa amin'ny admin.";
                 const lower = msg.toLowerCase();
                 if(lower.includes('depot') || lower.includes('dépôt')) {
-                    reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 (Manovo Hasambarana) ary andraso ny fankatoavan'ny admin.";
+                    reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 na Airtel Money 0336181891 ary andraso ny fankatoavan'ny admin.";
                 } else if(lower.includes('retrait')) {
                     reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar. Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
                 } else if(lower.includes('bonus')) {
@@ -565,6 +574,8 @@
             const amount = parseInt(document.getElementById('dep-amount').value);
             const phone = document.getElementById('dep-phone').value;
             const ref = document.getElementById('dep-ref').value;
+            const proofInput = document.getElementById('dep-proof');
+            const proofFileName = proofInput.files && proofInput.files[0] ? proofInput.files[0].name : 'Justificatif.jpg';
 
             if(amount < 15000) return alert('Minimum dépôt est de 15 000 Ar.');
 
@@ -576,6 +587,7 @@
                 amount,
                 phone,
                 ref,
+                proofFileName,
                 status: 'En attente'
             });
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
@@ -607,7 +619,6 @@
             alert('Demande de retrait soumise.');
         }
 
-        // ENREGISTREMENT DE L'ABONNEMENT AVEC STOCKAGE DE L'INTERVALLE EXACT
         function subscribe(planId, price, income, durationDays, payoutDaysInterval) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
@@ -641,7 +652,6 @@
             localStorage.setItem('bossman_users', JSON.stringify(users));
         }
 
-        // --- GESTION DES TIMERS ET VERSEMENTS AUTOMATIQUES CORRECTS ---
         let siteActiveSeconds = 0;
 
         setInterval(() => {
@@ -649,7 +659,6 @@
             const now = Date.now();
 
             if(currentUser.activeSub) {
-                // Valeurs par défaut si le contrat n'a pas les propriétés stockées
                 if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
                     const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
                     currentUser.activeSub.nextPayoutAt = now + intervalMs;
@@ -675,7 +684,6 @@
                             date: new Date().toLocaleString()
                         });
                         
-                        // Utilise l'intervalle exact propre à cet abonnement (2, 3 ou 4 jours)
                         const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
                         currentUser.activeSub.nextPayoutAt = Math.min(now + intervalMs, currentUser.activeSub.expiresAt);
                         
@@ -695,7 +703,6 @@
                 }
             }
 
-            // Bonus d'activité (5 min)
             siteActiveSeconds++;
             if(siteActiveSeconds >= 300) {
                 siteActiveSeconds = 0;
@@ -711,7 +718,6 @@
             }
         }, 1000);
 
-        // ACCÈS ADMIN
         function openAdminLogin() {
             const code = prompt('Entrez le mot de passe admin :');
             if(code && code.trim() === 'Hasamlegacy') {
@@ -741,15 +747,31 @@
 
             const reqList = document.getElementById('admin-requests-list');
             reqList.innerHTML = requests.map(r => `
-                <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-white">${r.type} - ${r.userName || r.userName}: <span class="text-green-400">${r.amount ? r.amount + ' Ar' : r.refCode}</span></p>
-                        <p class="text-gray-400 text-[10px]">Statut: ${r.status}</p>
+                <div class="bg-gray-900 p-2.5 rounded-xl space-y-1 mb-2">
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-white">${r.type} - ${r.userName} : <span class="text-green-400">${r.amount} Ar</span></p>
+                        <span class="text-[10px] text-gray-400">Statut: ${r.status}</span>
                     </div>
+                    ${r.type === 'Dépôt' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
+                            <p>📞 Tél expéditeur : <span class="text-orange-400 font-bold">${r.phone}</span></p>
+                            <p>🔢 Référence SMS : <span class="text-yellow-400 font-bold">${r.ref}</span></p>
+                            <p>🖼️ Fichier/Image : <span class="text-indigo-400">${r.proofFileName || 'Justificatif.jpg'}</span></p>
+                        </div>
+                    ` : r.type === 'Retrait' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
+                            <p>💳 Méthode : <span class="text-blue-400 font-bold">${r.method}</span></p>
+                            <p>📲 Tél réception : <span class="text-green-400 font-bold">${r.phone}</span></p>
+                        </div>
+                    ` : `
+                        <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded">
+                            <p>Parrain code : ${r.refCode}</p>
+                        </div>
+                    `}
                     ${r.status.includes('En attente') ? `
-                        <div class="space-x-1">
-                            <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 px-2 py-1 rounded text-white font-bold">Valider</button>
-                            <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 px-2 py-1 rounded text-white font-bold">Refuser</button>
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-white font-bold text-xs">Valider</button>
+                            <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white font-bold text-xs">Refuser</button>
                         </div>
                     ` : ''}
                 </div>
