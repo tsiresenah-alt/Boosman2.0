@@ -135,14 +135,14 @@
                     <h4 id="active-sub-name" class="font-bold text-green-400 text-sm flex items-center space-x-2">
                         <i class="fa-solid fa-circle-check"></i> <span>Abonnement Actif</span>
                     </h4>
-                    <p class="text-xs text-gray-300 mt-1">Prochain versement dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400">02:00</span></p>
+                    <p class="text-xs text-gray-300 mt-1">Prochain versement dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400">00:00</span></p>
                 </div>
                 <div class="text-right">
                     <span class="inline-block bg-green-600/30 text-green-300 text-[10px] font-bold px-2.5 py-1 rounded-full blinking-red">Actif en cours</span>
                 </div>
             </div>
 
-            <!-- Nouveaux Abonnements -->
+            <!-- 5 Abonnements configurés -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
                 <!-- Abonnement 1 -->
@@ -607,7 +607,7 @@
             alert('Demande de retrait soumise.');
         }
 
-        // GESTION DES ABONNEMENTS (Durée en jours convertie en minutes de test rapide)
+        // ENREGISTREMENT DE L'ABONNEMENT AVEC STOCKAGE DE L'INTERVALLE EXACT
         function subscribe(planId, price, income, durationDays, payoutDaysInterval) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
@@ -620,6 +620,8 @@
                 id: planId,
                 name: `Abonnement ${planId}`,
                 income: income,
+                durationDays: durationDays,
+                payoutDaysInterval: payoutDaysInterval,
                 expiresAt: now + durationMs,
                 nextPayoutAt: now + payoutIntervalMs
             };
@@ -639,7 +641,7 @@
             localStorage.setItem('bossman_users', JSON.stringify(users));
         }
 
-        // --- GESTION DES TIMERS ---
+        // --- GESTION DES TIMERS ET VERSEMENTS AUTOMATIQUES CORRECTS ---
         let siteActiveSeconds = 0;
 
         setInterval(() => {
@@ -647,14 +649,16 @@
             const now = Date.now();
 
             if(currentUser.activeSub) {
+                // Valeurs par défaut si le contrat n'a pas les propriétés stockées
                 if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
-                    currentUser.activeSub.nextPayoutAt = now + (2 * 60 * 1000);
-                    currentUser.activeSub.expiresAt = now + (31 * 60 * 1000);
+                    const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
+                    currentUser.activeSub.nextPayoutAt = now + intervalMs;
+                    currentUser.activeSub.expiresAt = now + ((currentUser.activeSub.durationDays || 31) * 60 * 1000);
                 }
 
                 if(now >= currentUser.activeSub.expiresAt) {
                     currentUser.history.push({
-                        type: `Fin de contrat ${currentUser.activeSub.name}`,
+                        type: `Fin de contrat Abonnement ${currentUser.activeSub.id}`,
                         amount: 0,
                         date: new Date().toLocaleString()
                     });
@@ -666,12 +670,15 @@
                     if(now >= currentUser.activeSub.nextPayoutAt) {
                         currentUser.balance += currentUser.activeSub.income;
                         currentUser.history.push({
-                            type: `Revenu période (${currentUser.activeSub.name})`,
+                            type: `Revenu Abonnement ${currentUser.activeSub.id}`,
                             amount: currentUser.activeSub.income,
                             date: new Date().toLocaleString()
                         });
-                        // Prochain versement (ex: 2, 3 ou 4 jours selon l'abonnement)
-                        currentUser.activeSub.nextPayoutAt = Math.min(now + (2 * 60 * 1000), currentUser.activeSub.expiresAt);
+                        
+                        // Utilise l'intervalle exact propre à cet abonnement (2, 3 ou 4 jours)
+                        const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
+                        currentUser.activeSub.nextPayoutAt = Math.min(now + intervalMs, currentUser.activeSub.expiresAt);
+                        
                         saveUserData();
                         updateDashboardUI();
                         playNotificationSound();
@@ -760,7 +767,6 @@
                     targetUser.balance += req.amount;
                     targetUser.history.push({type: 'Dépôt approuvé', amount: req.amount, date: new Date().toLocaleString()});
 
-                    // Bonus de 0.5% pour le parrain lors d'un dépôt validé
                     if(targetUser.referredBy) {
                         const sponsor = users.find(u => u.referralCode === targetUser.referredBy);
                         if(sponsor) {
