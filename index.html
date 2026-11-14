@@ -150,7 +150,7 @@
             <div id="active-sub-banner" class="hidden bg-gradient-to-r from-emerald-950/40 via-gray-900 to-emerald-950/40 border border-emerald-500/30 p-5 rounded-2xl mb-6 flex justify-between items-center shadow-lg shadow-emerald-950/20">
                 <div>
                     <h4 id="active-sub-name" class="font-bold text-emerald-400 text-sm flex items-center space-x-2 mb-1">
-                        <i class="fa-solid fa-circle-check"></i> <span>Abonnement Actif</span>
+                        <i class="fa-solid fa-circle-check"></i> <span>ABONNEMENT Actif</span>
                     </h4>
                     <p class="text-xs text-gray-300">Prochain versement dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400 tracking-wider">48:00:00</span></p>
                 </div>
@@ -161,7 +161,7 @@
 
             <!-- 5 Abonnements exacts -->
             <h3 class="font-extrabold text-sm uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-gem text-yellow-500"></i> <span>Abonnements Disponibles</span>
+                <i class="fa-solid fa-gem text-yellow-500"></i> <span>ABONNEMENTS Disponibles</span>
             </h3>
             <div id="subscriptions-container" class="space-y-3.5 mb-2">
                 <!-- Rempli dynamiquement en JS -->
@@ -177,11 +177,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-6">
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Gestion des Mises à Jour (Abonnements)</h3>
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Gestion des Mises à Jour (ABONNEMENTS)</h3>
                         <div id="admin-sub-maintenance-list" class="space-y-2 text-xs"></div>
                     </div>
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Utilisateurs inscrits & Abonnements</h3>
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Utilisateurs inscrits & ABONNEMENTS</h3>
                         <div id="admin-users-list" class="space-y-3 max-h-60 overflow-y-auto text-xs pr-1"></div>
                     </div>
                 </div>
@@ -337,11 +337,11 @@
         }
 
         const subscriptionsData = [
-            { id: 1, name: "Abonnement 1 (Débutant)", price: 15000, income: 1000, duration: 31, interval: 2, isVip: false },
-            { id: 2, name: "Abonnement 2 (Standard)", price: 25000, income: 1500, duration: 30, interval: 2, isVip: false },
-            { id: 3, name: "Abonnement 3 (Pro)", price: 40000, income: 3000, duration: 25, interval: 3, isVip: false },
-            { id: 4, name: "Abonnement 4 (VIP BOSS)", price: 75000, income: 5000, duration: 31, interval: 3, isVip: true },
-            { id: 5, name: "Abonnement 5 (VIP premium)", price: 90000, income: 6000, duration: 40, interval: 4, isVip: true }
+            { id: 1, name: "ABONNEMENT 1 (Débutant)", price: 15000, income: 1000, duration: 31, interval: 2, isVip: false },
+            { id: 2, name: "ABONNEMENT 2 (Standard)", price: 25000, income: 1500, duration: 30, interval: 2, isVip: false },
+            { id: 3, name: "ABONNEMENT 3 (Pro)", price: 40000, income: 3000, duration: 25, interval: 3, isVip: false },
+            { id: 4, name: "ABONNEMENT 4 (VIP BOSS)", price: 75000, income: 5000, duration: 31, interval: 3, isVip: true },
+            { id: 5, name: "ABONNEMENT 5 (VIP premium)", price: 90000, income: 6000, duration: 40, interval: 4, isVip: true }
         ];
 
         const translations = {
@@ -404,7 +404,7 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="font-extrabold ${sub.isVip ? 'text-yellow-400' : 'text-emerald-400'} text-sm">
-                                    Abonnement ${sub.id} <span class="text-gray-400 font-normal">(${sub.name.split('(')[1] || ''}</span>
+                                    ABONNEMENT ${sub.id} <span class="text-gray-400 font-normal">(${sub.name.split('(')[1] || ''}</span>
                                 </h4>
                                 <p class="text-[11px] text-gray-400 mt-1">Durée : <strong class="text-gray-200">${sub.duration} jours</strong> | Revenu : <strong class="text-yellow-400">${sub.income.toLocaleString()} Ar / ${sub.interval} jours</strong></p>
                                 <p class="text-xs font-bold mt-2 text-gray-200">Prix : <span class="${sub.isVip ? 'text-yellow-400' : 'text-emerald-400'} font-black">${sub.price.toLocaleString()} Ar</span></p>
@@ -772,7 +772,7 @@
 
             currentUser.activeSub = {
                 id: planId,
-                name: `Abonnement ${planId}`,
+                name: `ABONNEMENT ${planId}`,
                 income: income,
                 durationDays: durationDays,
                 payoutDaysInterval: payoutDaysInterval,
@@ -780,12 +780,12 @@
                 nextPayoutAt: now + payoutIntervalMs
             };
 
-            currentUser.history.push({type: `Achat Abonnement ${planId} (${durationDays} Jours)`, amount: -price, date: new Date().toLocaleString()});
+            currentUser.history.push({type: `Achat ABONNEMENT ${planId} (${durationDays} Jours)`, amount: -price, date: new Date().toLocaleString()});
             
             saveUserData();
             updateDashboardUI();
             playNotificationSound();
-            alert(`Abonnement ${planId} activé avec succès pour ${durationDays} jours !`);
+            alert(`ABONNEMENT ${planId} activé avec succès pour ${durationDays} jours !`);
         }
 
         function saveUserData() {
@@ -811,7 +811,7 @@
 
                 if(now >= currentUser.activeSub.expiresAt) {
                     currentUser.history.push({
-                        type: `Fin de contrat Abonnement ${currentUser.activeSub.id}`,
+                        type: `Fin de contrat ABONNEMENT ${currentUser.activeSub.id}`,
                         amount: 0,
                         date: new Date().toLocaleString()
                     });
@@ -823,7 +823,7 @@
                     if(now >= currentUser.activeSub.nextPayoutAt) {
                         currentUser.balance += currentUser.activeSub.income;
                         currentUser.history.push({
-                            type: `Revenu Abonnement ${currentUser.activeSub.id}`,
+                            type: `Revenu ABONNEMENT ${currentUser.activeSub.id}`,
                             amount: currentUser.activeSub.income,
                             date: new Date().toLocaleString()
                         });
@@ -885,7 +885,7 @@
             localStorage.setItem('bossman_sub_maintenance', JSON.stringify(subMaintenance));
             loadAdminData();
             playNotificationSound();
-            alert(`Statut de mise à jour modifié pour l'Abonnement ${subId}.`);
+            alert(`Statut de mise à jour modifié pour l'ABONNEMENT ${subId}.`);
         }
 
         function loadAdminData() {
