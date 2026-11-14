@@ -201,12 +201,12 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-800 p-4 rounded-xl">
-                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits & Filleuls</h3>
-                    <div id="admin-users-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits, Abonnements & Compteurs</h3>
+                    <div id="admin-users-list" class="space-y-3 max-h-80 overflow-y-auto text-xs"></div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl">
                     <h3 class="font-bold mb-3 text-sm text-gray-300">Demandes (Dépôts / Retraits / Parrainages)</h3>
-                    <div id="admin-requests-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
+                    <div id="admin-requests-list" class="space-y-3 max-h-80 overflow-y-auto text-xs"></div>
                 </div>
             </div>
         </div>
@@ -744,27 +744,38 @@
 
         function loadAdminData() {
             const usersList = document.getElementById('admin-users-list');
-            usersList.innerHTML = users.map(u => `
-                <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-white">${u.name} (${u.phone}) - Code: ${u.referralCode}</p>
-                        <p class="text-gray-400">Solde: ${u.balance} Ar | Parrain: ${u.referredBy || 'Aucun'} ${u.activeSub ? '| <span class="text-green-400">Sub Actif</span>' : ''}</p>
+            usersList.innerHTML = users.map(u => {
+                let subInfo = '<span class="text-gray-500">Aucun abonnement actif</span>';
+                if(u.activeSub) {
+                    const now = Date.now();
+                    const daysLeft = Math.max(0, Math.ceil((u.activeSub.expiresAt - now) / (60 * 1000)));
+                    const nextPayoutLeft = Math.max(0, Math.floor((u.activeSub.nextPayoutAt - now) / 1000));
+                    let m = Math.floor(nextPayoutLeft / 60);
+                    let s = nextPayoutLeft % 60;
+                    subInfo = `<span class="text-green-400 font-bold">${u.activeSub.name}</span> | Durée restante : <span class="text-yellow-400 font-bold">${daysLeft} jours</span> | Prochain versement : <span class="text-cyan-400 font-mono font-bold">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>`;
+                }
+                return `
+                    <div class="bg-gray-900 p-3 rounded-xl space-y-1 border border-gray-800">
+                        <p class="font-bold text-white text-sm">${u.name} (${u.phone})</p>
+                        <p class="text-gray-400 text-xs">Code: ${u.referralCode} | Solde: <span class="text-green-400 font-bold">${u.balance} Ar</span></p>
+                        <div class="bg-gray-800 p-2 rounded text-[11px] mt-1">${subInfo}</div>
                     </div>
-                </div>
-            `).join('') || '<p class="text-gray-500">Aucun utilisateur</p>';
+                `;
+            }).join('') || '<p class="text-gray-500">Aucun utilisateur</p>';
 
             const reqList = document.getElementById('admin-requests-list');
             reqList.innerHTML = requests.map(r => `
-                <div class="bg-gray-900 p-2.5 rounded-xl space-y-1 mb-2">
+                <div class="bg-gray-900 p-2.5 rounded-xl space-y-2 mb-2 border border-gray-800">
                     <div class="flex justify-between items-center">
                         <p class="font-bold text-white">${r.type} - ${r.userName} : <span class="text-green-400">${r.amount} Ar</span></p>
                         <span class="text-[10px] text-gray-400">Statut: ${r.status}</span>
                     </div>
                     ${r.type === 'Dépôt' ? `
-                        <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
+                        <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-1">
                             <p>📞 Tél expéditeur : <span class="text-orange-400 font-bold">${r.phone}</span></p>
                             <p>🔢 Référence SMS : <span class="text-yellow-400 font-bold">${r.ref}</span></p>
-                            <p>🖼️ Fichier/Image : ${r.proofDataUrl ? `<a href="${r.proofDataUrl}" target="_blank" class="text-indigo-400 underline font-semibold hover:text-indigo-300">${r.proofFileName || 'Voir l’image'} (Cliquer pour ouvrir)</a>` : `<span class="text-gray-400">${r.proofFileName || 'Justificatif.jpg'}</span>`}</p>
+                            <p>🖼️ <strong>Image / Justificatif :</strong></p>
+                            ${r.proofDataUrl ? `<div class="mt-1"><img src="${r.proofDataUrl}" alt="Justificatif de dépôt" class="w-full h-auto max-h-48 rounded border border-gray-700 object-contain bg-black"></div>` : `<span class="text-gray-400">${r.proofFileName || 'Aucune image'}</span>`}
                         </div>
                     ` : r.type === 'Retrait' ? `
                         <div class="text-[11px] text-gray-300 bg-gray-800 p-2 rounded space-y-0.5">
@@ -778,8 +789,8 @@
                     `}
                     ${r.status.includes('En attente') ? `
                         <div class="flex space-x-2 pt-1">
-                            <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-white font-bold text-xs">Valider</button>
-                            <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white font-bold text-xs">Refuser</button>
+                            <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-white font-bold text-xs transition">Valider</button>
+                            <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white font-bold text-xs transition">Refuser</button>
                         </div>
                     ` : ''}
                 </div>
