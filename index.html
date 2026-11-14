@@ -135,14 +135,14 @@
                     <h4 id="active-sub-name" class="font-bold text-green-400 text-sm flex items-center space-x-2">
                         <i class="fa-solid fa-circle-check"></i> <span>Abonnement Actif</span>
                     </h4>
-                    <p class="text-xs text-gray-300 mt-1">Prochain versement dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400">00:00</span></p>
+                    <p class="text-xs text-gray-300 mt-1">Prochain versement dans : <span id="sub-timer" class="font-mono font-bold text-yellow-400">00:00:00</span></p>
                 </div>
                 <div class="text-right">
                     <span class="inline-block bg-green-600/30 text-green-300 text-[10px] font-bold px-2.5 py-1 rounded-full blinking-red">Actif en cours</span>
                 </div>
             </div>
 
-            <!-- 5 Abonnements -->
+            <!-- 5 Abonnements Exacts -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
                 <!-- Abonnement 1 -->
@@ -152,7 +152,7 @@
                         <p class="text-xs text-gray-400">Durée : 31 jours | Revenu : 1 000 Ar / 2 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 15 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(1, 15000, 1000, 31, 2)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(1, 'Abonnement 1 (Débutant)', 15000, 1000, 31, 2)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <!-- Abonnement 2 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
@@ -161,7 +161,7 @@
                         <p class="text-xs text-gray-400">Durée : 30 jours | Revenu : 1 500 Ar / 2 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 25 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(2, 25000, 1500, 30, 2)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(2, 'Abonnement 2 (Standard)', 25000, 1500, 30, 2)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <!-- Abonnement 3 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
@@ -170,7 +170,7 @@
                         <p class="text-xs text-gray-400">Durée : 25 jours | Revenu : 3 000 Ar / 3 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 40 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(3, 40000, 3000, 25, 3)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(3, 'Abonnement 3 (Pro)', 40000, 3000, 25, 3)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
                 <!-- Abonnement 4 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
@@ -179,7 +179,7 @@
                         <p class="text-xs text-gray-400">Durée : 31 jours | Revenu : 5 000 Ar / 3 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 75 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(4, 75000, 5000, 31, 3)" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold px-4 py-2 rounded-lg text-black transition">Souscrire</button>
+                    <button onclick="subscribe(4, 'Abonnement 4 (VIP BOSS)', 75000, 5000, 31, 3)" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold px-4 py-2 rounded-lg text-black transition">Souscrire</button>
                 </div>
                 <!-- Abonnement 5 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
@@ -188,7 +188,7 @@
                         <p class="text-xs text-gray-400">Durée : 40 jours | Revenu : 6 000 Ar / 4 jours</p>
                         <p class="text-sm font-semibold mt-1">Prix : 90 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(5, 90000, 6000, 40, 4)" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold px-4 py-2 rounded-lg text-black transition">Souscrire</button>
+                    <button onclick="subscribe(5, 'Abonnement 5 (VIP premium)', 90000, 6000, 40, 4)" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold px-4 py-2 rounded-lg text-black transition">Souscrire</button>
                 </div>
             </div>
         </div>
@@ -503,11 +503,12 @@
                 const now = Date.now();
                 let timeLeft = Math.floor((currentUser.activeSub.nextPayoutAt - now) / 1000);
                 if(timeLeft < 0) timeLeft = 0;
-                let m = Math.floor(timeLeft / 60);
+                let h = Math.floor(timeLeft / 3600);
+                let m = Math.floor((timeLeft % 3600) / 60);
                 let s = timeLeft % 60;
                 const timerDisplay = document.getElementById('sub-timer');
                 if(timerDisplay) {
-                    timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                    timerDisplay.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                 }
             } else {
                 subBanner.classList.add('hidden');
@@ -627,17 +628,18 @@
             alert('Demande de retrait soumise.');
         }
 
-        function subscribe(planId, price, income, durationDays, payoutDaysInterval) {
+        // SOUSCRIPTION AVEC TEMPS RÉEL (1 jour = 24 heures)
+        function subscribe(planId, planName, price, income, durationDays, payoutDaysInterval) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
             
             const now = Date.now();
-            const durationMs = durationDays * 60 * 1000; 
-            const payoutIntervalMs = payoutDaysInterval * 60 * 1000;
+            const durationMs = durationDays * 24 * 60 * 60 * 1000; 
+            const payoutIntervalMs = payoutDaysInterval * 24 * 60 * 60 * 1000;
 
             currentUser.activeSub = {
                 id: planId,
-                name: `Abonnement ${planId}`,
+                name: planName,
                 income: income,
                 durationDays: durationDays,
                 payoutDaysInterval: payoutDaysInterval,
@@ -645,12 +647,12 @@
                 nextPayoutAt: now + payoutIntervalMs
             };
 
-            currentUser.history.push({type: `Achat Abonnement ${planId} (${durationDays} Jours)`, amount: -price, date: new Date().toLocaleString()});
+            currentUser.history.push({type: `Achat ${planName} (${durationDays} Jours)`, amount: -price, date: new Date().toLocaleString()});
             
             saveUserData();
             updateDashboardUI();
             playNotificationSound();
-            alert(`Abonnement ${planId} activé avec succès pour ${durationDays} jours !`);
+            alert(`${planName} activé avec succès pour ${durationDays} jours !`);
         }
 
         function saveUserData() {
@@ -660,6 +662,7 @@
             localStorage.setItem('bossman_users', JSON.stringify(users));
         }
 
+        // --- GESTION DES TIMERS EN TEMPS RÉEL ---
         let siteActiveSeconds = 0;
 
         setInterval(() => {
@@ -668,14 +671,14 @@
 
             if(currentUser.activeSub) {
                 if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
-                    const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
+                    const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 24 * 60 * 60 * 1000;
                     currentUser.activeSub.nextPayoutAt = now + intervalMs;
-                    currentUser.activeSub.expiresAt = now + ((currentUser.activeSub.durationDays || 31) * 60 * 1000);
+                    currentUser.activeSub.expiresAt = now + ((currentUser.activeSub.durationDays || 31) * 24 * 60 * 60 * 1000);
                 }
 
                 if(now >= currentUser.activeSub.expiresAt) {
                     currentUser.history.push({
-                        type: `Fin de contrat Abonnement ${currentUser.activeSub.id}`,
+                        type: `Fin de contrat ${currentUser.activeSub.name}`,
                         amount: 0,
                         date: new Date().toLocaleString()
                     });
@@ -687,12 +690,12 @@
                     if(now >= currentUser.activeSub.nextPayoutAt) {
                         currentUser.balance += currentUser.activeSub.income;
                         currentUser.history.push({
-                            type: `Revenu Abonnement ${currentUser.activeSub.id}`,
+                            type: `Revenu ${currentUser.activeSub.name}`,
                             amount: currentUser.activeSub.income,
                             date: new Date().toLocaleString()
                         });
                         
-                        const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 60 * 1000;
+                        const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 24 * 60 * 60 * 1000;
                         currentUser.activeSub.nextPayoutAt = Math.min(now + intervalMs, currentUser.activeSub.expiresAt);
                         
                         saveUserData();
@@ -702,11 +705,12 @@
 
                     let timeLeft = Math.floor((currentUser.activeSub.nextPayoutAt - now) / 1000);
                     if(timeLeft < 0) timeLeft = 0;
-                    let m = Math.floor(timeLeft / 60);
+                    let h = Math.floor(timeLeft / 3600);
+                    let m = Math.floor((timeLeft % 3600) / 60);
                     let s = timeLeft % 60;
                     let timerDisplay = document.getElementById('sub-timer');
                     if(timerDisplay) {
-                        timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                        timerDisplay.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                     }
                 }
             }
@@ -748,11 +752,12 @@
                 let subInfo = '<span class="text-gray-500">Aucun abonnement actif</span>';
                 if(u.activeSub) {
                     const now = Date.now();
-                    const daysLeft = Math.max(0, Math.ceil((u.activeSub.expiresAt - now) / (60 * 1000)));
+                    const daysLeft = Math.max(0, Math.ceil((u.activeSub.expiresAt - now) / (24 * 60 * 60 * 1000)));
                     const nextPayoutLeft = Math.max(0, Math.floor((u.activeSub.nextPayoutAt - now) / 1000));
-                    let m = Math.floor(nextPayoutLeft / 60);
+                    let h = Math.floor(nextPayoutLeft / 3600);
+                    let m = Math.floor((nextPayoutLeft % 3600) / 60);
                     let s = nextPayoutLeft % 60;
-                    subInfo = `<span class="text-green-400 font-bold">${u.activeSub.name}</span> | Durée restante : <span class="text-yellow-400 font-bold">${daysLeft} jours</span> | Prochain versement : <span class="text-cyan-400 font-mono font-bold">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>`;
+                    subInfo = `<span class="text-green-400 font-bold">${u.activeSub.name}</span><br>Durée restante : <span class="text-yellow-400 font-bold">${daysLeft} jours</span><br>Prochain versement : <span class="text-cyan-400 font-mono font-bold">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>`;
                 }
                 return `
                     <div class="bg-gray-900 p-3 rounded-xl space-y-1 border border-gray-800">
