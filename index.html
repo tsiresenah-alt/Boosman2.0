@@ -24,7 +24,7 @@
         .blinking-red { animation: blinkRed 1s infinite; }
     </style>
 </head>
-<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between" onmousemove="refreshAdminBadge()" ontouchstart="refreshAdminBadge()">
 
     <!-- Bannière de mise à jour -->
     <div id="update-banner" class="bg-red-600 text-center py-2 font-bold text-sm hidden blinking-red">
@@ -79,7 +79,9 @@
             </form>
 
             <div class="mt-6 text-center">
-                <button onclick="openAdminLogin()" class="text-xs text-gray-600 hover:text-gray-400 underline">Accès Admin</button>
+                <button onclick="openAdminLogin()" class="relative text-xs text-gray-400 hover:text-white underline font-semibold px-3 py-1">
+                    Accès Admin <span id="admin-badge-count" class="hidden absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full blinking-red">0</span>
+                </button>
             </div>
         </div>
 
@@ -97,6 +99,10 @@
                     <p class="text-sm text-gray-400">Solde: <span id="dash-balance" class="text-green-400 font-bold">0 Ar</span></p>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <button onclick="openModal('support-chat-modal')" class="relative bg-red-600/20 hover:bg-red-600/40 p-2.5 rounded-full text-red-400 transition" title="Support Admin">
+                        <i class="fa-solid fa-headset"></i>
+                        <span id="user-msg-badge" class="hidden absolute -top-1 -right-1 bg-red-600 w-2.5 h-2.5 rounded-full blinking-red"></span>
+                    </button>
                     <button onclick="openModal('ai-chat-modal')" class="bg-indigo-600/20 hover:bg-indigo-600/40 p-2.5 rounded-full text-indigo-400 transition" title="Assistant IA">
                         <i class="fa-solid fa-robot"></i>
                     </button>
@@ -194,21 +200,40 @@
         </div>
 
         <!-- ADMIN -->
-        <div id="admin-page" class="w-full max-w-4xl bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl hidden">
+        <div id="admin-page" class="w-full max-w-5xl bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl hidden">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
                 <h2 class="text-xl font-bold text-red-500"><i class="fa-solid fa-shield-halved"></i> Tableau de bord Admin</h2>
-                <button onclick="logoutAdmin()" class="bg-gray-800 px-3 py-1 rounded text-sm">Quitter Admin</button>
+                <button onclick="logoutAdmin()" class="bg-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-700">Quitter Admin</button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-800 p-4 rounded-xl">
-                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits, Abonnements & Compteurs</h3>
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits & Abonnements</h3>
                     <div id="admin-users-list" class="space-y-3 max-h-80 overflow-y-auto text-xs"></div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl">
-                    <h3 class="font-bold mb-3 text-sm text-gray-300">Demandes (Dépôts / Retraits / Parrainages)</h3>
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">Demandes (Dépôts / Retraits)</h3>
                     <div id="admin-requests-list" class="space-y-3 max-h-80 overflow-y-auto text-xs"></div>
                 </div>
+                <div class="bg-gray-800 p-4 rounded-xl flex flex-col">
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">💬 Messages Support</h3>
+                    <div id="admin-support-list" class="flex-grow space-y-2 max-h-80 overflow-y-auto text-xs"></div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODALE SUPPORT CHAT UTILISATEUR -->
+    <div id="support-chat-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative flex flex-col h-[480px]">
+            <button onclick="closeModal('support-chat-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="font-bold text-lg mb-3 text-red-400 flex items-center space-x-2">
+                <i class="fa-solid fa-headset"></i> <span>Support Direct Admin</span>
+            </h3>
+            <div id="support-chat-messages" class="flex-grow bg-gray-800/50 border border-gray-800 rounded-xl p-3 overflow-y-auto space-y-3 text-xs mb-3"></div>
+            <form onsubmit="sendSupportMessage(event)" class="flex space-x-2">
+                <input type="text" id="support-input" placeholder="Écrivez votre message à l'admin..." required class="flex-grow bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-red-500">
+                <button type="submit" class="bg-red-600 hover:bg-red-500 px-4 py-2.5 rounded-lg text-xs font-bold transition">Envoyer</button>
+            </form>
         </div>
     </div>
 
@@ -329,6 +354,7 @@
         let currentUser = JSON.parse(localStorage.getItem('bossman_current_user')) || null;
         let users = JSON.parse(localStorage.getItem('bossman_users')) || [];
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+        let messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
         let currentLang = localStorage.getItem('bossman_lang') || 'fr';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -379,6 +405,35 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.5);
             } catch(e) {}
+        }
+
+        function refreshAdminBadge() {
+            requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+            messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
+            
+            const pendingReqCount = requests.filter(r => r.status && r.status.includes('En attente')).length;
+            const unreadMsgCount = messages.filter(m => m.sender === 'user' && !m.read).length;
+            const totalBadge = pendingReqCount + unreadMsgCount;
+
+            const badge = document.getElementById('admin-badge-count');
+            if(badge) {
+                if(totalBadge > 0) {
+                    badge.textContent = totalBadge;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            if(currentUser) {
+                messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
+                const userUnread = messages.some(m => m.userPhone === currentUser.phone && m.sender === 'admin' && !m.read);
+                const userMsgBadge = document.getElementById('user-msg-badge');
+                if(userMsgBadge) {
+                    if(userUnread) userMsgBadge.classList.remove('hidden');
+                    else userMsgBadge.classList.add('hidden');
+                }
+            }
         }
 
         function switchTab(tab) {
@@ -476,7 +531,7 @@
                 localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
                 updateDashboardUI();
                 document.getElementById('dashboard-page').classList.remove('hidden');
-            }, 2400);
+            }, 2000);
         }
 
         function logout() {
@@ -525,9 +580,23 @@
                     <span class="font-bold ${h.amount > 0 ? 'text-green-400' : 'text-red-400'}">${h.amount > 0 ? '+' : ''}${h.amount} Ar</span>
                 </div>
             `).join('') || '<p class="text-gray-500 text-center">Aucun historique</p>';
+
+            loadUserSupportChat();
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function openModal(id) { 
+            document.getElementById(id).classList.remove('hidden'); 
+            if(id === 'support-chat-modal') {
+                loadUserSupportChat();
+                // Marquer messages admin comme lus
+                messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
+                messages.forEach(m => {
+                    if(m.userPhone === currentUser.phone && m.sender === 'admin') m.read = true;
+                });
+                localStorage.setItem('bossman_messages', JSON.stringify(messages));
+                refreshAdminBadge();
+            }
+        }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function openSettings() { openModal('settings-modal'); }
 
@@ -571,6 +640,43 @@
             }, 1000);
         }
 
+        function sendSupportMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('support-input');
+            const text = input.value.trim();
+            if(!text || !currentUser) return;
+
+            messages.push({
+                id: Date.now(),
+                userPhone: currentUser.phone,
+                userName: currentUser.name,
+                sender: 'user',
+                text: text,
+                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                read: false
+            });
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+            input.value = '';
+            loadUserSupportChat();
+            refreshAdminBadge();
+            playNotificationSound();
+        }
+
+        function loadUserSupportChat() {
+            if(!currentUser) return;
+            messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
+            const chatBox = document.getElementById('support-chat-messages');
+            const userMsgs = messages.filter(m => m.userPhone === currentUser.phone);
+
+            chatBox.innerHTML = userMsgs.length ? userMsgs.map(m => `
+                <div class="p-2.5 rounded-lg max-w-[85%] ${m.sender === 'user' ? 'bg-red-600/30 ml-auto text-white' : 'bg-gray-800 text-gray-200'}">
+                    <p class="text-[10px] text-gray-400 mb-0.5">${m.sender === 'user' ? 'Vous' : 'Admin'} - ${m.date}</p>
+                    <p>${m.text}</p>
+                </div>
+            `).join('') : '<p class="text-gray-500 text-center py-4">Aucun message. Envoyez un message à l’admin !</p>';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         function submitDeposit(e) {
             e.preventDefault();
             const amount = parseInt(document.getElementById('dep-amount').value);
@@ -600,6 +706,7 @@
                     localStorage.setItem('bossman_requests', JSON.stringify(requests));
                     closeModal('deposit-modal');
                     alert('Demande de dépôt soumise avec succès.');
+                    refreshAdminBadge();
                 };
                 reader.readAsDataURL(file);
             }
@@ -627,9 +734,9 @@
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
             closeModal('withdraw-modal');
             alert('Demande de retrait soumise.');
+            refreshAdminBadge();
         }
 
-        // RÈGLE : 1 seul abonnement actif autorisé à la fois
         function subscribe(planId, price, income, durationDays, payoutDaysInterval) {
             if(currentUser.activeSub) {
                 return alert('Vous avez déjà un abonnement actif en cours ! Vous ne pouvez en souscrire qu’un seul à la fois.');
@@ -639,8 +746,6 @@
             currentUser.balance -= price;
             
             const now = Date.now();
-            // Conversion échelle test rapide (1 seconde réelle = 1 heure, donc 24s = 1 jour, ou test 1 min = 1 jour)
-            // Pour des tests rapides et fluides sur 48h / 72h / 96h, 1 seconde = 1 heure (ou 1 minute = 1 jour)
             const durationMs = durationDays * 24 * 60 * 1000; 
             const payoutIntervalMs = payoutDaysInterval * 24 * 60 * 1000;
 
@@ -672,6 +777,7 @@
         let siteActiveSeconds = 0;
 
         setInterval(() => {
+            refreshAdminBadge();
             if(!currentUser) return;
             const now = Date.now();
 
@@ -750,9 +856,16 @@
         function logoutAdmin() {
             document.getElementById('admin-page').classList.add('hidden');
             document.getElementById('auth-page').classList.remove('hidden');
+            refreshAdminBadge();
         }
 
         function loadAdminData() {
+            messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
+            // Marquer tous les messages comme lus pour l'admin
+            messages.forEach(m => m.read = true);
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+            refreshAdminBadge();
+
             const usersList = document.getElementById('admin-users-list');
             usersList.innerHTML = users.map(u => {
                 let subInfo = '<span class="text-gray-500">Aucun abonnement actif</span>';
@@ -806,6 +919,41 @@
                     ` : ''}
                 </div>
             `).join('') || '<p class="text-gray-500">Aucune demande</p>';
+
+            const supportList = document.getElementById('admin-support-list');
+            supportList.innerHTML = messages.length ? messages.map(m => `
+                <div class="bg-gray-900 p-2.5 rounded-xl border border-gray-800 space-y-1.5">
+                    <div class="flex justify-between items-center text-[10px] text-gray-400">
+                        <span class="font-bold text-white">${m.userName} (${m.userPhone})</span>
+                        <span>${m.date}</span>
+                    </div>
+                    <p class="text-gray-200 text-xs bg-gray-800 p-2 rounded">${m.text}</p>
+                    <div class="flex space-x-2 pt-1">
+                        <input type="text" id="admin-reply-${m.id}" placeholder="Répondre..." class="flex-grow bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white">
+                        <button onclick="sendAdminReply('${m.userPhone}', ${m.id})" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs font-bold">Envoyer</button>
+                    </div>
+                </div>
+            `).reverse().join('') : '<p class="text-gray-500 text-center py-4">Aucun message de support</p>';
+        }
+
+        function sendAdminReply(userPhone, msgId) {
+            const input = document.getElementById(`admin-reply-${msgId}`);
+            const text = input ? input.value.trim() : '';
+            if(!text) return;
+
+            messages.push({
+                id: Date.now(),
+                userPhone: userPhone,
+                userName: 'Admin',
+                sender: 'admin',
+                text: text,
+                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                read: false
+            });
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+            loadAdminData();
+            playNotificationSound();
+            alert('Réponse envoyée avec succès !');
         }
 
         function handleRequest(id, action) {
@@ -854,11 +1002,13 @@
             }
 
             loadAdminData();
+            refreshAdminBadge();
             playNotificationSound();
         }
 
         window.onload = function() {
             applyLanguage();
+            refreshAdminBadge();
             if(refFromUrl) {
                 const notice = document.getElementById('ref-notice');
                 if(notice) {
