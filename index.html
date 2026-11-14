@@ -592,7 +592,8 @@
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
             
-            const unviewedReqCount = requests.filter(r => !r.viewed).length;
+            // Compte uniquement les requêtes non lues (où viewed est explicitement false)
+            const unviewedReqCount = requests.filter(r => r.viewed === false).length;
             const unreadMsgCount = messages.filter(m => m.sender === 'user' && !m.read).length;
             const totalBadge = unviewedReqCount + unreadMsgCount;
 
@@ -851,6 +852,7 @@
             });
             localStorage.setItem('bossman_messages', JSON.stringify(messages));
 
+            // Enregistrement de la requête d'inscription pour l'admin (viewed: false déclenche la notification en temps réel)
             requests.push({
                 id: Date.now() + 1,
                 type: 'Nouvelle Inscription',
@@ -987,7 +989,6 @@
             }
             if(id === 'support-chat-modal') {
                 loadUserSupportChat();
-                // Lorsque l'utilisateur ouvre ses notifications/support, on marque les messages admin comme lus (le chiffre disparaît)
                 messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
                 messages.forEach(m => {
                     if(m.userPhone === currentUser.phone && m.sender === 'admin') m.read = true;
@@ -1271,7 +1272,7 @@
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('admin-page').classList.remove('hidden');
                 
-                // Lorsque l'admin ouvre son tableau de bord, on marque toutes les requêtes comme vues (le chiffre admin disparaît)
+                // Lorsque l'admin ouvre son tableau de bord, on marque toutes les requêtes comme vues en temps réel (le chiffre admin disparaît)
                 requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
                 requests.forEach(r => r.viewed = true);
                 localStorage.setItem('bossman_requests', JSON.stringify(requests));
@@ -1310,13 +1311,13 @@
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
             users = JSON.parse(localStorage.getItem('bossman_users')) || [];
 
-            // Marquer les requêtes et les messages utilisateur comme lus/vus lors du chargement de l'admin
+            // Marquer toutes les requêtes comme vues dès l'ouverture du panel admin
             requests.forEach(r => r.viewed = true);
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
 
             refreshAdminBadge();
 
-            const unviewedReqs = requests.filter(r => !r.viewed).length;
+            const unviewedReqs = requests.filter(r => r.viewed === false).length;
             const unreadMsgs = messages.filter(m => m.sender === 'user' && !m.read).length;
             const totalUsersCount = users.length;
 
@@ -1451,7 +1452,6 @@
 
             const supportList = document.getElementById('admin-support-list');
             supportList.innerHTML = messages.length ? messages.map(m => {
-                // Lorsque l'admin regarde les messages, on marque les messages utilisateur comme lus
                 if(m.sender === 'user') m.read = true;
                 return `
                     <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2 shadow-sm">
@@ -1531,14 +1531,12 @@
                     }
                 }
             } else {
-                // Si l'admin refuse, on lui demande d'entrer un message de confirmation / motif
                 let refusalMsg = prompt("Entrez le message de confirmation / motif du refus pour l'utilisateur :", "Votre demande a été refusée par l'administration.");
-                if(refusalMsg === null) return; // Annulé
+                if(refusalMsg === null) return;
 
                 req.status = 'Refusé (Rouge)';
                 req.adminMessage = refusalMsg;
 
-                // Envoyer automatiquement le message de refus dans le support chat de l'utilisateur avec une notification
                 messages.push({
                     id: Date.now(),
                     userPhone: req.userPhone,
