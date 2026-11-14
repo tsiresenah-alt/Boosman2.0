@@ -157,6 +157,23 @@
                 </button>
             </div>
 
+            <!-- BLOC TEST DE 7 JOURS & BONUS 1000 AR -->
+            <div id="test-7days-banner" class="bg-gray-950/60 border border-yellow-500/30 p-5 rounded-2xl mb-6 shadow-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold text-yellow-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-hourglass-half"></i> <span>Test du site (Période de 7 Jours)</span>
+                    </h4>
+                    <span id="test-status-badge" class="bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider">En cours</span>
+                </div>
+                <p class="text-xs text-gray-300 mb-3">Temps restant : <span id="test-timer" class="font-mono font-bold text-yellow-400">--:--:--</span></p>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <p class="text-[11px] text-gray-400">Testez le site pendant 7 jours sans problème pour recevoir <strong class="text-emerald-400">1 000 Ar</strong> versé par l'administration.</p>
+                    <button type="button" onclick="reportTestIssue()" id="btn-report-issue" class="bg-red-600/20 hover:bg-red-600/30 border border-red-600/40 text-red-400 text-xs font-bold px-3 py-2 rounded-xl transition whitespace-nowrap">
+                        Signaler un problème
+                    </button>
+                </div>
+            </div>
+
             <!-- BLOC ABONNEMENT ACTIF -->
             <div id="active-sub-banner" class="hidden bg-gradient-to-r from-emerald-950/40 via-gray-900 to-emerald-950/40 border border-emerald-500/30 p-5 rounded-2xl mb-6 flex justify-between items-center shadow-lg shadow-emerald-950/20">
                 <div>
@@ -187,6 +204,13 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-6">
+                    <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400 flex justify-between items-center">
+                            <span>🛠️ Gestion Test (7 Jours)</span>
+                            <span id="admin-test-count-badge" class="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+                        </h3>
+                        <div id="admin-test-users-list" class="space-y-3 max-h-48 overflow-y-auto text-xs pr-1"></div>
+                    </div>
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
                         <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Maintenance Sections / Boutons</h3>
                         <div id="admin-section-maintenance-list" class="space-y-2 text-xs"></div>
@@ -604,18 +628,15 @@
             if(confirm("Voulez-vous vraiment supprimer définitivement votre compte ? Vous pourrez vous réinscrire comme un nouveau utilisateur avec ce même numéro.")) {
                 const phoneToDelete = currentUser.phone;
                 
-                // Supprimer de la liste des utilisateurs
                 users = users.filter(u => u.phone !== phoneToDelete);
                 localStorage.setItem('bossman_users', JSON.stringify(users));
 
-                // Nettoyer ses demandes et messages associés
                 requests = requests.filter(r => r.userPhone !== phoneToDelete);
                 localStorage.setItem('bossman_requests', JSON.stringify(requests));
 
                 messages = messages.filter(m => m.userPhone !== phoneToDelete);
                 localStorage.setItem('bossman_messages', JSON.stringify(messages));
 
-                // Déconnecter l'utilisateur actuel
                 currentUser = null;
                 localStorage.removeItem('bossman_current_user');
 
@@ -686,7 +707,100 @@
                 alert('Erreur lors de la mise à jour du mot de passe.');
             }
         }
-        // ------------------------------------
+
+        // --- GESTION DU TEST DE 7 JOURS & BONUS 1000 AR ---
+        function reportTestIssue() {
+            if(!currentUser) return;
+            if(confirm("Voulez-vous vraiment signaler un problème sur le site ? Cela annulera votre éligibilité au bonus de test de 1 000 Ar.")) {
+                currentUser.hasReportedIssue = true;
+                currentUser.testStatus = 'echoue';
+                saveUserData();
+                updateDashboardUI();
+                alert("Problème signalé. La période de test est invalidée pour le bonus de 1 000 Ar.");
+            }
+        }
+
+        function updateTest7DaysUI() {
+            if(!currentUser) return;
+            const banner = document.getElementById('test-7days-banner');
+            if(!banner) return;
+
+            if(!currentUser.testStartDate) {
+                currentUser.testStartDate = Date.now();
+                currentUser.testStatus = 'en_cours';
+                currentUser.hasReportedIssue = false;
+                currentUser.testRewardClaimed = false;
+                saveUserData();
+            }
+
+            const now = Date.now();
+            const totalDurationMs = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
+            const elapsed = now - currentUser.testStartDate;
+            const timeLeft = totalDurationMs - elapsed;
+
+            const badge = document.getElementById('test-status-badge');
+            const timer = document.getElementById('test-timer');
+            const btnReport = document.getElementById('btn-report-issue');
+
+            if(currentUser.testRewardClaimed) {
+                badge.textContent = "Récompensé (1 000 Ar)";
+                badge.className = "bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider";
+                timer.textContent = "Test réussi et validé !";
+                if(btnReport) btnReport.style.display = 'none';
+            } else if(currentUser.hasReportedIssue || currentUser.testStatus === 'echoue') {
+                badge.textContent = "Test Échoué / Problème signalé";
+                badge.className = "bg-red-500/20 border border-red-500/30 text-red-300 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider";
+                timer.textContent = "Inéligible au bonus de 1 000 Ar";
+                if(btnReport) btnReport.style.display = 'none';
+            } else if(timeLeft <= 0) {
+                badge.textContent = "Test 7 Jours Validé (En attente de l'admin)";
+                badge.className = "bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider";
+                timer.textContent = "0j 00:00:00 (Terminé sans problème)";
+                if(currentUser.testStatus !== 'valide' && !currentUser.testRewardClaimed) {
+                    currentUser.testStatus = 'valide';
+                    saveUserData();
+                }
+            } else {
+                let sec = Math.floor(timeLeft / 1000);
+                let days = Math.floor(sec / (3600 * 24));
+                let h = Math.floor((sec % (3600 * 24)) / 3600);
+                let m = Math.floor((sec % 3600) / 60);
+                let s = sec % 60;
+                timer.textContent = `${days}j ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+        }
+
+        function adminGrantTestReward(userPhone) {
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
+            const targetUser = users.find(u => u.phone === userPhone);
+            if(!targetUser) return;
+
+            if(targetUser.testRewardClaimed) {
+                return alert("Ce bonus a déjà été versé à cet utilisateur.");
+            }
+
+            targetUser.balance += 1000;
+            targetUser.testRewardClaimed = true;
+            targetUser.testStatus = 'recompense';
+            targetUser.history.push({
+                type: 'Bonus Test 7 Jours sans problème (Administration)',
+                amount: 1000,
+                date: new Date().toLocaleString()
+            });
+
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+
+            if(currentUser && currentUser.phone === userPhone) {
+                currentUser = targetUser;
+                localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+                updateDashboardUI();
+            }
+
+            loadAdminData();
+            playNotificationSound();
+            alert("1 000 Ar versés avec succès par l'administration !");
+        }
+        // ---------------------------------------------------
 
         function handleRegister(e) {
             e.preventDefault();
@@ -710,6 +824,10 @@
                 referralCode,
                 referredBy,
                 activeSub: null,
+                testStartDate: Date.now(),
+                testStatus: 'en_cours',
+                hasReportedIssue: false,
+                testRewardClaimed: false,
                 history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
             };
 
@@ -793,6 +911,7 @@
 
             renderSubscriptionsList();
             updateSectionUI();
+            updateTest7DaysUI();
 
             const subBanner = document.getElementById('active-sub-banner');
             if(currentUser.activeSub) {
@@ -893,8 +1012,8 @@
                     reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 na Airtel Money 0336181891 ary andraso ny fankatoavan'ny admin.";
                 } else if(lower.includes('retrait')) {
                     reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar (misy frais de transfert 200 Ar). Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
-                } else if(lower.includes('bonus')) {
-                    reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany!";
+                } else if(lower.includes('bonus') || lower.includes('test')) {
+                    reply = "Mahazo bonus 2000 Ar amin'ny fisoratana anarana ianao, ary afaka mahazo 1 000 Ar fanampiny avy amin'ny admin raha mandalo soa aman-tsara ny fitsapana mandritra ny 7 andro tsy misy olana!";
                 }
 
                 chatBox.innerHTML += `<div class="bg-gray-800 border border-gray-700/60 p-3 rounded-2xl max-w-[85%] text-gray-200 shadow-sm"><strong>IA:</strong> ${reply}</div>`;
@@ -1065,6 +1184,8 @@
             if(!currentUser) return;
             const now = Date.now();
 
+            updateTest7DaysUI();
+
             if(currentUser.activeSub) {
                 if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
                     const intervalMs = (currentUser.activeSub.payoutDaysInterval || 2) * 24 * 60 * 1000;
@@ -1174,6 +1295,9 @@
             const userCountBadge = document.getElementById('admin-users-count-badge');
             if(userCountBadge) userCountBadge.textContent = totalUsersCount + ' utilisateur(s)';
 
+            const testCountBadge = document.getElementById('admin-test-count-badge');
+            if(testCountBadge) testCountBadge.textContent = totalUsersCount + ' testeur(s)';
+
             const reqCountBadge = document.getElementById('admin-requests-count-badge');
             if(reqCountBadge) {
                 if(unviewedReqs > 0) {
@@ -1192,6 +1316,44 @@
                 } else {
                     supportCountBadge.classList.add('hidden');
                 }
+            }
+
+            // Gestion de la liste des tests 7 jours dans l'admin
+            const testUsersList = document.getElementById('admin-test-users-list');
+            if(testUsersList) {
+                testUsersList.innerHTML = users.map(u => {
+                    const now = Date.now();
+                    const totalDurationMs = 7 * 24 * 60 * 60 * 1000;
+                    const startDate = u.testStartDate || now;
+                    const elapsed = now - startDate;
+                    const timeLeft = totalDurationMs - elapsed;
+                    const isFinished = timeLeft <= 0;
+
+                    let statusStr = "En cours (7j)";
+                    let badgeColor = "text-yellow-400";
+                    if(u.testRewardClaimed) {
+                        statusStr = "✅ Récompensé (1 000 Ar)";
+                        badgeColor = "text-emerald-400";
+                    } else if(u.hasReportedIssue) {
+                        statusStr = "❌ Problème signalé";
+                        badgeColor = "text-red-400";
+                    } else if(isFinished) {
+                        statusStr = "🎉 7 Jours validés (Prêt)";
+                        badgeColor = "text-blue-400";
+                    }
+
+                    return `
+                        <div class="bg-gray-900 border border-gray-800 p-3 rounded-xl space-y-1">
+                            <p class="font-bold text-white text-xs">${u.name} <span class="text-gray-400 font-normal">(${u.phone})</span></p>
+                            <p class="text-[11px] text-gray-400">Statut : <span class="${badgeColor} font-bold">${statusStr}</span></p>
+                            ${isFinished && !u.testRewardClaimed && !u.hasReportedIssue ? `
+                                <button type="button" onclick="adminGrantTestReward('${u.phone}')" class="mt-1 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider transition shadow-md">
+                                    Envoyer 1 000 Ar (Bonus Test)
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('') || '<p class="text-gray-500 text-center py-2">Aucun testeur</p>';
             }
 
             const secMaintList = document.getElementById('admin-section-maintenance-list');
