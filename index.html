@@ -1,4 +1,4 @@
-CT<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="mg">
 <head>
     <meta charset="UTF-8">
@@ -314,17 +314,44 @@ CT<!DOCTYPE html>
     </div>
 
     <!-- AUTRES MODALES -->
+    <!-- MODALE SUPPORT CHAT AVEC ONGLET DE FORMULAIRE DE DÉPÔT INTÉGRÉ -->
     <div id="support-chat-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative flex flex-col h-[500px] shadow-2xl">
+        <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative flex flex-col h-[550px] shadow-2xl">
             <button type="button" onclick="closeModal('support-chat-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="font-black text-base mb-4 text-red-400 flex items-center space-x-2.5">
-                <i class="fa-solid fa-headset text-lg"></i> <span>Support Direct Admin</span>
+            <h3 class="font-black text-base mb-3 text-red-400 flex items-center space-x-2.5">
+                <i class="fa-solid fa-headset text-lg"></i> <span>Support Direct Admin & Dépôt</span>
             </h3>
-            <div id="support-chat-messages" class="flex-grow bg-gray-950/60 border border-gray-800/80 rounded-2xl p-4 overflow-y-auto space-y-3 text-xs mb-4"></div>
-            <form onsubmit="sendSupportMessage(event)" class="flex space-x-2">
-                <input type="text" id="support-input" placeholder="Écrivez votre message à l'admin..." required class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-500">
-                <button type="submit" class="bg-red-600 hover:bg-red-500 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg shadow-red-600/20">Envoyer</button>
-            </form>
+
+            <!-- Onglets de basculement dans le support -->
+            <div class="flex bg-gray-950 p-1 rounded-xl border border-gray-800 mb-3 text-xs font-bold">
+                <button type="button" onclick="switchSupportTab('chat')" id="sup-tab-chat" class="flex-1 py-2 rounded-lg bg-red-600 text-white transition">💬 Discussion</button>
+                <button type="button" onclick="switchSupportTab('deposit')" id="sup-tab-deposit" class="flex-1 py-2 rounded-lg text-gray-400 hover:text-white transition">💳 Faire un Dépôt</button>
+            </div>
+
+            <!-- Contenu Discussion -->
+            <div id="support-chat-content" class="flex flex-col flex-grow overflow-hidden">
+                <div id="support-chat-messages" class="flex-grow bg-gray-950/60 border border-gray-800/80 rounded-2xl p-4 overflow-y-auto space-y-3 text-xs mb-3"></div>
+                <form onsubmit="sendSupportMessage(event)" class="flex space-x-2">
+                    <input type="text" id="support-input" placeholder="Écrivez votre message à l'admin..." required class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-500">
+                    <button type="submit" class="bg-red-600 hover:bg-red-500 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg shadow-red-600/20">Envoyer</button>
+                </form>
+            </div>
+
+            <!-- Contenu Formulaire de Dépôt Intégré dans le Support -->
+            <div id="support-deposit-content" class="flex flex-col flex-grow overflow-y-auto hidden pr-1 space-y-3">
+                <div class="bg-gray-950/80 border border-emerald-500/30 p-3 rounded-xl text-xs">
+                    <p class="text-red-400 font-bold mb-1 pulse-badge">Minimum dépôt 15000ar - Minimum retrait 3000ar</p>
+                    <p class="text-gray-300">Orange Money : <span class="text-orange-400 font-extrabold">0371897870</span> (Manovo)</p>
+                    <p class="text-gray-300 mt-0.5">Airtel Money : <span class="text-red-400 font-extrabold">0336181891</span> (Riantso)</p>
+                </div>
+                <form onsubmit="submitChatDepositForm(event)" class="space-y-3">
+                    <input type="number" id="chat-dep-amount" placeholder="Montant (ex: 15000)" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <input type="tel" id="chat-dep-phone" placeholder="Votre numéro expéditeur" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <input type="text" id="chat-dep-ref" placeholder="Référence SMS transfert" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <input type="file" id="chat-dep-proof" accept="image/*" required class="w-full text-xs text-gray-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-bold file:bg-gray-800 file:text-emerald-400 cursor-pointer">
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/20 transition">Soumettre le Dépôt</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -592,7 +619,6 @@ CT<!DOCTYPE html>
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
             
-            // Compte uniquement les requêtes non lues (où viewed est explicitement false)
             const unviewedReqCount = requests.filter(r => r.viewed === false).length;
             const unreadMsgCount = messages.filter(m => m.sender === 'user' && !m.read).length;
             const totalBadge = unviewedReqCount + unreadMsgCount;
@@ -636,6 +662,25 @@ CT<!DOCTYPE html>
             }
         }
 
+        function switchSupportTab(tab) {
+            const chatContent = document.getElementById('support-chat-content');
+            const depositContent = document.getElementById('support-deposit-content');
+            const chatBtn = document.getElementById('sup-tab-chat');
+            const depositBtn = document.getElementById('sup-tab-deposit');
+
+            if(tab === 'chat') {
+                chatContent.classList.remove('hidden');
+                depositContent.classList.add('hidden');
+                chatBtn.className = 'flex-1 py-2 rounded-lg bg-red-600 text-white transition';
+                depositBtn.className = 'flex-1 py-2 rounded-lg text-gray-400 hover:text-white transition';
+            } else {
+                chatContent.classList.add('hidden');
+                depositContent.classList.remove('hidden');
+                depositBtn.className = 'flex-1 py-2 rounded-lg bg-emerald-600 text-white transition';
+                chatBtn.className = 'flex-1 py-2 rounded-lg text-gray-400 hover:text-white transition';
+            }
+        }
+
         function validatePassword(input) {
             const feedback = document.getElementById('pass-feedback');
             if(input.value.length < 6) {
@@ -651,7 +696,6 @@ CT<!DOCTYPE html>
             }
         }
 
-        // --- SUPPRESSION DE COMPTE ---
         function deleteAccount() {
             if(!currentUser) return;
             if(confirm("Voulez-vous vraiment supprimer définitivement votre compte ? Vous pourrez vous réinscrire comme un nouveau utilisateur avec ce même numéro.")) {
@@ -677,7 +721,6 @@ CT<!DOCTYPE html>
             }
         }
 
-        // --- GESTION MOT DE PASSE OUBLIÉ ---
         function sendForgotPasswordCode() {
             const phone = document.getElementById('forgot-phone').value.trim();
             if(!phone || phone.length < 10) return alert('Veuillez entrer un numéro de téléphone valide.');
@@ -737,7 +780,6 @@ CT<!DOCTYPE html>
             }
         }
 
-        // --- GESTION DE L'HORLOGE 24H ET EXPIRATION DU TEST ---
         function updateTest24hClock() {
             if(!currentUser) return;
             const banner = document.getElementById('test-24h-banner');
@@ -774,7 +816,6 @@ CT<!DOCTYPE html>
             }
         }
 
-        // --- SOUMISSION DU RAPPORT DE BUG (TEST) ---
         function submitBugReport(e) {
             e.preventDefault();
             if(!currentUser) return;
@@ -839,8 +880,7 @@ CT<!DOCTYPE html>
 
             users.push(newUser);
             localStorage.setItem('bossman_users', JSON.stringify(users));
-URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https://script.google.com/macros/s/AKfycby2DxTCIGkeekKzP2FVMqBueVu7PIDqbtv-MCItgcRzMM4XzMRZBFO9hdUuXEnJmqBc/exec" , { method: "POST", body: params })
-            // Message de bienvenue automatique avec notification pour le nouvel utilisateur
+
             messages.push({
                 id: Date.now(),
                 userPhone: phone,
@@ -852,7 +892,6 @@ URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https
             });
             localStorage.setItem('bossman_messages', JSON.stringify(messages));
 
-            // Enregistrement de la requête d'inscription pour l'admin (viewed: false déclenche la notification en temps réel)
             requests.push({
                 id: Date.now() + 1,
                 type: 'Nouvelle Inscription',
@@ -1113,6 +1152,61 @@ URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https
             }
         }
 
+        function submitChatDepositForm(e) {
+            e.preventDefault();
+            if(!currentUser) return alert("Veuillez vous connecter.");
+            const amount = parseInt(document.getElementById('chat-dep-amount').value);
+            const phone = document.getElementById('chat-dep-phone').value;
+            const ref = document.getElementById('chat-dep-ref').value;
+            const proofInput = document.getElementById('chat-dep-proof');
+
+            if(amount < 15000) return alert('Minimum dépôt est de 15 000 Ar.');
+
+            const file = proofInput.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    const proofDataUrl = uploadEvent.target.result;
+                    requests.push({
+                        id: Date.now(),
+                        type: 'Dépôt',
+                        userPhone: currentUser.phone,
+                        userName: currentUser.name,
+                        amount,
+                        phone,
+                        ref,
+                        proofFileName: file.name,
+                        proofDataUrl: proofDataUrl,
+                        status: 'En attente',
+                        viewed: false
+                    });
+                    localStorage.setItem('bossman_requests', JSON.stringify(requests));
+                    
+                    // Ajouter également dans le chat
+                    messages.push({
+                        id: Date.now() + 1,
+                        userPhone: currentUser.phone,
+                        userName: currentUser.name,
+                        sender: 'user',
+                        text: `[Demande de Dépôt] Montant : ${amount} Ar | Tél : ${phone} | Réf : ${ref}`,
+                        date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                        read: false
+                    });
+                    localStorage.setItem('bossman_messages', JSON.stringify(messages));
+
+                    alert('Demande de dépôt soumise avec succès depuis le chat support !');
+                    document.getElementById('chat-dep-amount').value = '';
+                    document.getElementById('chat-dep-phone').value = '';
+                    document.getElementById('chat-dep-ref').value = '';
+                    proofInput.value = '';
+                    switchSupportTab('chat');
+                    loadUserSupportChat();
+                    refreshAdminBadge();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function calculateWithdrawNet() {
             const amount = parseInt(document.getElementById('wit-amount').value) || 0;
             const fee = Math.round(amount * 0.10);
@@ -1272,7 +1366,6 @@ URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('admin-page').classList.remove('hidden');
                 
-                // Lorsque l'admin ouvre son tableau de bord, on marque toutes les requêtes comme vues en temps réel (le chiffre admin disparaît)
                 requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
                 requests.forEach(r => r.viewed = true);
                 localStorage.setItem('bossman_requests', JSON.stringify(requests));
@@ -1311,7 +1404,6 @@ URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
             users = JSON.parse(localStorage.getItem('bossman_users')) || [];
 
-            // Marquer toutes les requêtes comme vues dès l'ouverture du panel admin
             requests.forEach(r => r.viewed = true);
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
 
@@ -1579,37 +1671,8 @@ URLSearchParams({ username: name, phone: phone, password: pass }); fetch(" https
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('dashboard-page').classList.remove('hidden');
                 updateDashboardUI();
-        
             }
         };
-// Exemple pour charger les utilisateurs dans l'Admin Dashboard
-async function loadAdminDashboard() {
-  const { data: users, error } = await supabase
-    .from('users')
-    .select('*')
-    .order('created_at', { ascending: false }); // Trie du plus récent au plus ancien
-
-  if (error) {
-    console.error("Erreur de chargement admin :", error.message);
-    return;
-  }
-
-  const adminContainer = document.getElementById('admin-user-list');
-  adminContainer.innerHTML = '';
-
-  users.forEach(user => {
-    adminContainer.innerHTML += `
-      <div class="user-card">
-        <p><strong>Utilisateur :</strong> ${user.username}</p>
-        <p><strong>Téléphone :</strong> ${user.phone}</p>
-        <p><strong>Parrain :</strong> ${user.parrain}</p>
-        <hr>
-      </div>
-    `;
-  });
-}
-
-        
     </script>
 </body>
 </html>
