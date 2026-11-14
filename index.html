@@ -61,6 +61,7 @@
                     <input type="password" id="reg-pass" oninput="validatePassword(this)" required class="w-full bg-gray-800 border border-red-500 rounded-lg p-3 text-white focus:outline-none">
                     <p id="pass-feedback" class="text-xs text-red-500 mt-1">Le mot de passe doit contenir au moins 6 caractères.</p>
                 </div>
+                <div id="ref-notice" class="text-xs text-yellow-400 hidden"></div>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 font-bold py-3 rounded-lg transition">S'inscrire (+2 000 Ar Bonus)</button>
             </form>
 
@@ -141,32 +142,44 @@
                 </div>
             </div>
 
-            <!-- Abonnements -->
+            <!-- Abonnements Optimisés & Rentables -->
             <h3 class="font-bold text-md mb-3 text-gray-300">Abonnements Disponibles</h3>
             <div class="space-y-3 mb-6">
+                <!-- Abonnemnt 1 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
-                        <h4 class="font-bold text-green-400">Abonnement 1</h4>
-                        <p class="text-xs text-gray-400">Durée : 10 min | Revenu auto: 1 000 Ar / 5 min</p>
+                        <h4 class="font-bold text-green-400">Abonnement 1 (Débutant)</h4>
+                        <p class="text-xs text-gray-400">Durée : 10 min | Revenu : 1 000 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 15 000 Ar</p>
                     </div>
                     <button onclick="subscribe(1, 15000, 1000, 10)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
+                <!-- Abonnement 2 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
-                        <h4 class="font-bold text-green-400">Abonnement 2</h4>
-                        <p class="text-xs text-gray-400">Durée : 10 min | Revenu auto: 1 500 Ar / 5 min</p>
+                        <h4 class="font-bold text-green-400">Abonnement 2 (Standard)</h4>
+                        <p class="text-xs text-gray-400">Durée : 15 min | Revenu : 1 500 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 25 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(2, 25000, 1500, 10)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(2, 25000, 1500, 15)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
                 </div>
+                <!-- Abonnement 3 -->
                 <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
                     <div>
-                        <h4 class="font-bold text-green-400">Abonnement 3</h4>
-                        <p class="text-xs text-gray-400">Durée : 15 min | Revenu auto: 3 000 Ar / 5 min</p>
+                        <h4 class="font-bold text-green-400">Abonnement 3 (Pro)</h4>
+                        <p class="text-xs text-gray-400">Durée : 20 min | Revenu : 3 000 Ar / 5 min</p>
                         <p class="text-sm font-semibold mt-1">Prix : 40 000 Ar</p>
                     </div>
-                    <button onclick="subscribe(3, 40000, 3000, 15)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                    <button onclick="subscribe(3, 40000, 3000, 20)" class="bg-green-600 hover:bg-green-500 text-xs font-bold px-4 py-2 rounded-lg transition">Souscrire</button>
+                </div>
+                <!-- Abonnement 4 (VIP) -->
+                <div class="bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-yellow-400">Abonnement 4 (VIP BOSS)</h4>
+                        <p class="text-xs text-gray-400">Durée : 30 min | Revenu : 6 000 Ar / 5 min</p>
+                        <p class="text-sm font-semibold mt-1">Prix : 75 000 Ar</p>
+                    </div>
+                    <button onclick="subscribe(4, 75000, 6000, 30)" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold px-4 py-2 rounded-lg text-black transition">Souscrire</button>
                 </div>
             </div>
         </div>
@@ -179,11 +192,11 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-800 p-4 rounded-xl">
-                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits</h3>
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">Utilisateurs inscrits & Filleuls</h3>
                     <div id="admin-users-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl">
-                    <h3 class="font-bold mb-3 text-sm text-gray-300">Demandes (Dépôts / Retraits)</h3>
+                    <h3 class="font-bold mb-3 text-sm text-gray-300">Demandes (Dépôts / Retraits / Parrainages)</h3>
                     <div id="admin-requests-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
                 </div>
             </div>
@@ -227,12 +240,15 @@
         </div>
     </div>
 
+    <!-- MODALE PARRAINAGE (AVEC VRAI LIEN ET CLIC DIRECT) -->
     <div id="referral-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md relative text-center">
             <button onclick="closeModal('referral-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-bold text-lg mb-2 text-yellow-400">Parrainage</h3>
-            <p class="text-xs text-gray-400 mb-4">Invitez vos amis avec votre code unique :</p>
-            <div class="bg-gray-800 p-3 rounded-lg font-mono text-lg text-green-400 font-bold mb-4" id="ref-code-display">BOSSMAN-01</div>
+            <p class="text-xs text-gray-400 mb-2">Votre code unique :</p>
+            <div class="bg-gray-800 p-2 rounded-lg font-mono text-sm text-green-400 font-bold mb-3" id="ref-code-display">BOSSMAN-01</div>
+            <p class="text-xs text-gray-400 mb-2">Vrai lien d'invitation direct :</p>
+            <input type="text" id="ref-link-input" readonly class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-center text-green-300 mb-4 select-all">
             <div class="space-y-2">
                 <button onclick="copyReferralLink()" class="w-full bg-yellow-600 hover:bg-yellow-500 font-bold py-2.5 rounded-lg text-sm text-black transition">Copier le lien</button>
                 <button onclick="shareOnWhatsApp()" class="w-full bg-green-500 hover:bg-green-400 font-bold py-2.5 rounded-lg text-sm text-white transition flex items-center justify-center space-x-2">
@@ -297,6 +313,13 @@
         let users = JSON.parse(localStorage.getItem('bossman_users')) || [];
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
         let currentLang = localStorage.getItem('bossman_lang') || 'fr';
+
+        // Détection automatique du lien de parrainage dans l'URL lors du chargement
+        const urlParams = new URLSearchParams(window.location.search);
+        const refFromUrl = urlParams.get('ref');
+        if(refFromUrl) {
+            localStorage.setItem('bossman_pending_ref', refFromUrl);
+        }
 
         const translations = {
             fr: {
@@ -382,6 +405,7 @@
 
             const userIndex = users.length + 1;
             const referralCode = `BOSSMAN-${String(userIndex).padStart(2, '0')}`;
+            const referredBy = localStorage.getItem('bossman_pending_ref') || null;
 
             const newUser = {
                 name,
@@ -389,12 +413,27 @@
                 pass,
                 balance: 2000,
                 referralCode,
+                referredBy,
                 activeSub: null,
                 history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
             };
 
             users.push(newUser);
             localStorage.setItem('bossman_users', JSON.stringify(users));
+
+            // Notifier l'admin qu'un nouveau filleul a rejoint via un parrain
+            if(referredBy) {
+                requests.push({
+                    id: Date.now(),
+                    type: 'Nouveau Filleul',
+                    userName: name,
+                    userPhone: phone,
+                    refCode: referredBy,
+                    status: 'En attente bonus parrain'
+                });
+                localStorage.setItem('bossman_requests', JSON.stringify(requests));
+                localStorage.removeItem('bossman_pending_ref');
+            }
 
             playNotificationSound();
             alert('Inscription réussie ! Vous avez reçu 2 000 Ar de bonus.');
@@ -437,6 +476,10 @@
             document.getElementById('dash-username').textContent = currentUser.name;
             document.getElementById('dash-balance').textContent = currentUser.balance + ' Ar';
             document.getElementById('ref-code-display').textContent = currentUser.referralCode;
+            
+            // Générer le vrai lien cliquable
+            const realLink = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
+            document.getElementById('ref-link-input').value = realLink;
 
             const subBanner = document.getElementById('active-sub-banner');
             if(currentUser.activeSub) {
@@ -463,14 +506,15 @@
         function openSettings() { openModal('settings-modal'); }
 
         function copyReferralLink() {
-            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
-            navigator.clipboard.writeText(link);
-            alert('Lien de parrainage copié !');
+            const linkInput = document.getElementById('ref-link-input');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            alert('Lien de parrainage copié avec succès !');
         }
 
         function shareOnWhatsApp() {
-            const link = window.location.href.split('?')[0] + '?ref=' + currentUser.referralCode;
-            const text = encodeURIComponent(`Midira ao amin'ny BOSSMAN Mada! Reçois 2000Ar de bonus avec mon code ${currentUser.referralCode}. Lien : ${link}`);
+            const link = document.getElementById('ref-link-input').value;
+            const text = encodeURIComponent(`Midira ao amin'ny BOSSMAN Mada! Mahazoa bonus 2000Ar amin'ny alalan'ny kioka eto: ${link}`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
@@ -493,7 +537,7 @@
                 } else if(lower.includes('retrait')) {
                     reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar. Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
                 } else if(lower.includes('bonus')) {
-                    reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany!";
+                    reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany ary koa bonus parrainage!";
                 }
 
                 chatBox.innerHTML += `<div class="bg-gray-800 p-2.5 rounded-lg max-w-[85%] text-gray-300"><strong>IA:</strong> ${reply}</div>`;
@@ -548,7 +592,6 @@
             alert('Demande de retrait soumise.');
         }
 
-        // SOUSCRIPTION AVEC GESTION DU CONTRAT EN MINUTES ET TIMESTAMPS
         function subscribe(planId, price, income, durationMinutes) {
             if(currentUser.balance < price) return alert('Solde insuffisant pour cet abonnement.');
             currentUser.balance -= price;
@@ -558,8 +601,8 @@
                 id: planId,
                 name: `Abonnement ${planId}`,
                 income: income,
-                expiresAt: now + (durationMinutes * 60 * 1000), // Fin totale du contrat
-                nextPayoutAt: now + (5 * 60 * 1000) // Prochain revenu dans 5 minutes
+                expiresAt: now + (durationMinutes * 60 * 1000),
+                nextPayoutAt: now + (5 * 60 * 1000)
             };
 
             currentUser.history.push({type: `Achat Abonnement ${planId}`, amount: -price, date: new Date().toLocaleString()});
@@ -577,16 +620,19 @@
             localStorage.setItem('bossman_users', JSON.stringify(users));
         }
 
-        // --- GESTION DES TIMERS EN TEMPS RÉEL (BASÉ SUR LES TIMESTAMPS) ---
+        // --- GESTION DES TIMERS ET VÉRIFICATIONS ---
         let siteActiveSeconds = 0;
 
         setInterval(() => {
             if(!currentUser) return;
             const now = Date.now();
 
-            // 1. Gestion de l'abonnement actif et du contrat
             if(currentUser.activeSub) {
-                // Vérifier si le contrat global est terminé
+                if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
+                    currentUser.activeSub.nextPayoutAt = now + (5 * 60 * 1000);
+                    currentUser.activeSub.expiresAt = now + (10 * 60 * 1000);
+                }
+
                 if(now >= currentUser.activeSub.expiresAt) {
                     currentUser.history.push({
                         type: `Fin de contrat ${currentUser.activeSub.name}`,
@@ -596,9 +642,8 @@
                     currentUser.activeSub = null;
                     saveUserData();
                     updateDashboardUI();
-                    alert("Votre abonnement est terminé ! Veuillez souscrire à un nouvel abonnement pour continuer à recevoir des revenus.");
+                    alert("Votre abonnement est terminé ! Veuillez souscrire à un nouvel abonnement pour continuer.");
                 } else {
-                    // Vérifier si c'est l'heure du versement du revenu (toutes les 5 minutes)
                     if(now >= currentUser.activeSub.nextPayoutAt) {
                         currentUser.balance += currentUser.activeSub.income;
                         currentUser.history.push({
@@ -606,14 +651,12 @@
                             amount: currentUser.activeSub.income,
                             date: new Date().toLocaleString()
                         });
-                        // Planifier le prochain versement 5 minutes plus tard (sans dépasser la fin du contrat)
                         currentUser.activeSub.nextPayoutAt = Math.min(now + (5 * 60 * 1000), currentUser.activeSub.expiresAt);
                         saveUserData();
                         updateDashboardUI();
                         playNotificationSound();
                     }
 
-                    // Calculer le temps restant exact pour l'affichage (ne se réinitialise plus lors d'un rafraîchissement)
                     let timeLeft = Math.floor((currentUser.activeSub.nextPayoutAt - now) / 1000);
                     if(timeLeft < 0) timeLeft = 0;
                     let m = Math.floor(timeLeft / 60);
@@ -625,7 +668,7 @@
                 }
             }
 
-            // 2. Bonus de présence active sur le site (5 minutes = 300 secondes)
+            // Bonus d'activité (5 min)
             siteActiveSeconds++;
             if(siteActiveSeconds >= 300) {
                 siteActiveSeconds = 0;
@@ -663,8 +706,8 @@
             usersList.innerHTML = users.map(u => `
                 <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
                     <div>
-                        <p class="font-bold text-white">${u.name} (${u.phone})</p>
-                        <p class="text-gray-400">Solde: ${u.balance} Ar ${u.activeSub ? '| <span class="text-green-400">Sub Actif</span>' : ''}</p>
+                        <p class="font-bold text-white">${u.name} (${u.phone}) - Code: ${u.referralCode}</p>
+                        <p class="text-gray-400">Solde: ${u.balance} Ar | Parrain: ${u.referredBy || 'Aucun'} ${u.activeSub ? '| <span class="text-green-400">Sub Actif</span>' : ''}</p>
                     </div>
                 </div>
             `).join('') || '<p class="text-gray-500">Aucun utilisateur</p>';
@@ -673,10 +716,10 @@
             reqList.innerHTML = requests.map(r => `
                 <div class="bg-gray-900 p-2 rounded flex justify-between items-center">
                     <div>
-                        <p class="font-bold text-white">${r.type} - ${r.userName}: <span class="text-green-400">${r.amount} Ar</span></p>
+                        <p class="font-bold text-white">${r.type} - ${r.userName || r.userName}: <span class="text-green-400">${r.amount ? r.amount + ' Ar' : r.refCode}</span></p>
                         <p class="text-gray-400 text-[10px]">Statut: ${r.status}</p>
                     </div>
-                    ${r.status === 'En attente' ? `
+                    ${r.status.includes('En attente') ? `
                         <div class="space-x-1">
                             <button onclick="handleRequest(${r.id}, 'Valider')" class="bg-green-600 px-2 py-1 rounded text-white font-bold">Valider</button>
                             <button onclick="handleRequest(${r.id}, 'Refuser')" class="bg-red-600 px-2 py-1 rounded text-white font-bold">Refuser</button>
@@ -696,9 +739,29 @@
                 if(req.type === 'Dépôt' && targetUser) {
                     targetUser.balance += req.amount;
                     targetUser.history.push({type: 'Dépôt approuvé', amount: req.amount, date: new Date().toLocaleString()});
+
+                    // Bonus automatique de 0.5% pour le parrain si le filleul fait un dépôt
+                    if(targetUser.referredBy) {
+                        const sponsor = users.find(u => u.referralCode === targetUser.referredBy);
+                        if(sponsor) {
+                            const sponsorBonus = Math.round(req.amount * 0.005); // 0.5%
+                            sponsor.balance += sponsorBonus;
+                            sponsor.history.push({
+                                type: `Bonus parrainage (0.5% dépôt de ${targetUser.name})`,
+                                amount: sponsorBonus,
+                                date: new Date().toLocaleString()
+                            });
+                        }
+                    }
                 } else if(req.type === 'Retrait' && targetUser) {
                     targetUser.balance -= req.amount;
                     targetUser.history.push({type: 'Retrait approuvé', amount: -req.amount, date: new Date().toLocaleString()});
+                } else if(req.type === 'Nouveau Filleul') {
+                    // Admin valide le filleul / envoie un bonus
+                    if(targetUser) {
+                        targetUser.balance += 1000; // Bonus d'accueil parrain
+                        targetUser.history.push({type: 'Bonus parrain approuvé', amount: 1000, date: new Date().toLocaleString()});
+                    }
                 }
             } else {
                 req.status = 'Refusé (Rouge)';
@@ -719,6 +782,14 @@
 
         window.onload = function() {
             applyLanguage();
+            // Pré-remplir un avis si un lien de parrainage est utilisé
+            if(refFromUrl) {
+                const notice = document.getElementById('ref-notice');
+                if(notice) {
+                    notice.textContent = `Invitation détectée (Parrain : ${refFromUrl})`;
+                    notice.classList.remove('hidden');
+                }
+            }
             if(currentUser) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('dashboard-page').classList.remove('hidden');
