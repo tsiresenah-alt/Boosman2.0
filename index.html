@@ -297,13 +297,17 @@
         </div>
     </div>
 
+    <!-- MODALE DE RETRAIT AVEC FRAIS DE TRANSFERT -->
     <div id="withdraw-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button onclick="closeModal('withdraw-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-black text-lg mb-1 text-blue-400">Faire un Retrait</h3>
-            <p class="text-red-400 text-xs font-bold mb-5 pulse-badge">Minimum retrait 3000 Ar</p>
+            <p class="text-red-400 text-xs font-bold mb-3 pulse-badge">Minimum retrait 3000 Ar (Frais de transfert : 200 Ar)</p>
             <form onsubmit="submitWithdraw(event)" class="space-y-4">
-                <input type="number" id="wit-amount" placeholder="Montant" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500">
+                <div>
+                    <input type="number" id="wit-amount" placeholder="Montant (ex: 3000)" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="calculateWithdrawNet()">
+                    <p id="wit-net-info" class="text-[11px] text-gray-400 mt-1.5 font-medium">Vous recevrez : <span class="text-emerald-400 font-bold">0 Ar</span> (après 200 Ar de frais)</p>
+                </div>
                 <select id="wit-method" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500">
                     <option value="Orange Money">Orange Money</option>
                     <option value="Airtel Money">Airtel Money</option>
@@ -591,7 +595,6 @@
 
             tempResetPhone = phone;
 
-            // Masquer l'étape 1 et afficher le loader de 2.5 secondes
             document.getElementById('forgot-step-1').classList.add('hidden');
             document.getElementById('forgot-loader').classList.remove('hidden');
 
@@ -599,10 +602,7 @@
                 document.getElementById('forgot-loader').classList.add('hidden');
                 document.getElementById('forgot-step-2').classList.remove('hidden');
 
-                // Générer un code SMS aléatoire à 4 chiffres
                 generatedSmsCode = String(Math.floor(1000 + Math.random() * 9000));
-                
-                // Alerte simulant la réception du SMS
                 alert(`📱 [SIMULATION SMS] Code de confirmation BOSSMAN Mada : ${generatedSmsCode}`);
             }, 2500);
         }
@@ -632,14 +632,12 @@
                 alert('Mot de passe modifié avec succès ! Vous pouvez maintenant vous connecter.');
                 closeModal('forgot-password-modal');
 
-                // Réinitialiser les étapes de la modale
                 document.getElementById('forgot-step-3').classList.add('hidden');
                 document.getElementById('forgot-step-1').classList.remove('hidden');
                 document.getElementById('forgot-phone').value = '';
                 document.getElementById('forgot-code-input').value = '';
                 document.getElementById('forgot-new-pass').value = '';
 
-                // Basculer sur l'onglet connexion et pré-remplir le numéro
                 switchTab('login');
                 document.getElementById('log-phone').value = tempResetPhone;
             } else {
@@ -800,6 +798,9 @@
             }
 
             document.getElementById(id).classList.remove('hidden'); 
+            if(id === 'withdraw-modal') {
+                calculateWithdrawNet();
+            }
             if(id === 'support-chat-modal') {
                 loadUserSupportChat();
                 messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
@@ -843,7 +844,7 @@
                 if(lower.includes('depot') || lower.includes('dépôt')) {
                     reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 na Airtel Money 0336181891 ary andraso ny fankatoavan'ny admin.";
                 } else if(lower.includes('retrait')) {
-                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar. Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
+                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar (misy frais de transfert 200 Ar). Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
                 } else if(lower.includes('bonus')) {
                     reply = "Mahazo bonus 2000 Ar avy hatrany ianao rehefa misoratra anarana voalohany!";
                 }
@@ -926,14 +927,28 @@
             }
         }
 
+        function calculateWithdrawNet() {
+            const amount = parseInt(document.getElementById('wit-amount').value) || 0;
+            const fee = 200;
+            const net = amount > fee ? amount - fee : 0;
+            const netInfo = document.getElementById('wit-net-info');
+            if(netInfo) {
+                netInfo.innerHTML = `Vous recevrez : <span class="text-emerald-400 font-bold">${net.toLocaleString()} Ar</span> (Frais de transfert : ${fee} Ar)`;
+            }
+        }
+
         function submitWithdraw(e) {
             e.preventDefault();
             const amount = parseInt(document.getElementById('wit-amount').value);
             const method = document.getElementById('wit-method').value;
             const phone = document.getElementById('wit-phone').value;
+            const fee = 200; // Frais de transfert fixes
 
             if(amount < 3000) return alert('Minimum retrait est de 3 000 Ar.');
             if(amount > currentUser.balance) return alert('Solde insuffisant.');
+
+            const netAmount = amount - fee;
+            if(netAmount <= 0) return alert('Le montant est insuffisant pour couvrir les frais de transfert.');
 
             requests.push({
                 id: Date.now(),
@@ -941,6 +956,8 @@
                 userPhone: currentUser.phone,
                 userName: currentUser.name,
                 amount,
+                fee,
+                netAmount,
                 method,
                 phone,
                 status: 'En attente',
@@ -948,7 +965,7 @@
             });
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
             closeModal('withdraw-modal');
-            alert('Demande de retrait soumise.');
+            alert(`Demande de retrait soumise !\nMontant demandé : ${amount.toLocaleString()} Ar\nFrais : ${fee} Ar\nNet à recevoir : ${netAmount.toLocaleString()} Ar`);
             refreshAdminBadge();
         }
 
@@ -1177,6 +1194,9 @@
                         <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
                             <p>💳 Méthode : <span class="text-blue-400 font-bold">${r.method}</span></p>
                             <p>📲 Tél réception : <span class="text-emerald-400 font-bold">${r.phone}</span></p>
+                            <p>💰 Demandé : <span class="text-yellow-400 font-bold">${r.amount?.toLocaleString()} Ar</span></p>
+                            <p>🏷️ Frais : <span class="text-red-400 font-bold">-${r.fee || 200} Ar</span></p>
+                            <p>✅ Net à envoyer : <span class="text-emerald-400 font-bold">${r.netAmount?.toLocaleString() || (r.amount - 200)} Ar</span></p>
                         </div>
                     ` : r.type === 'Nouvelle Inscription' ? `
                         <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
@@ -1236,71 +1256,4 @@
         function handleRequest(id, action) {
             const req = requests.find(r => r.id === id);
             if(!req) return;
-            const targetUser = users.find(u => u.phone === req.userPhone);
-
-            if(action === 'Valider') {
-                req.status = 'Validé (Vert)';
-                if(req.type === 'Dépôt' && targetUser) {
-                    targetUser.balance += req.amount;
-                    targetUser.history.push({type: 'Dépôt approuvé', amount: req.amount, date: new Date().toLocaleString()});
-
-                    if(targetUser.referredBy) {
-                        const sponsor = users.find(u => u.referralCode === targetUser.referredBy);
-                        if(sponsor) {
-                            const sponsorBonus = Math.round(req.amount * 0.005);
-                            sponsor.balance += sponsorBonus;
-                            sponsor.history.push({
-                                type: `Bonus parrainage (0.5% dépôt de ${targetUser.name})`,
-                                amount: sponsorBonus,
-                                date: new Date().toLocaleString()
-                            });
-                        }
-                    }
-                } else if(req.type === 'Retrait' && targetUser) {
-                    targetUser.balance -= req.amount;
-                    targetUser.history.push({type: 'Retrait approuvé', amount: -req.amount, date: new Date().toLocaleString()});
-                } else if(req.type === 'Nouveau Filleul') {
-                    if(targetUser) {
-                        targetUser.balance += 1000;
-                        targetUser.history.push({type: 'Bonus parrain approuvé', amount: 1000, date: new Date().toLocaleString()});
-                    }
-                }
-            } else {
-                req.status = 'Refusé (Rouge)';
-            }
-
-            localStorage.setItem('bossman_requests', JSON.stringify(requests));
-            localStorage.setItem('bossman_users', JSON.stringify(users));
-
-            if(currentUser && targetUser && currentUser.phone === targetUser.phone) {
-                currentUser = targetUser;
-                localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
-                updateDashboardUI();
-            }
-
-            loadAdminData();
-            refreshAdminBadge();
-            playNotificationSound();
-        }
-
-        window.onload = function() {
-            applyLanguage();
-            refreshAdminBadge();
-            renderSubscriptionsList();
-            updateSectionUI();
-            if(refFromUrl) {
-                const notice = document.getElementById('ref-notice');
-                if(notice) {
-                    notice.textContent = `Invitation détectée (Parrain : ${refFromUrl})`;
-                    notice.classList.remove('hidden');
-                }
-            }
-            if(currentUser) {
-                document.getElementById('auth-page').classList.add('hidden');
-                document.getElementById('dashboard-page').classList.remove('hidden');
-                updateDashboardUI();
-            }
-        };
-    </script>
-</body>
-</html>
+            const targetUser = users.find(
