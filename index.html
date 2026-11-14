@@ -326,16 +326,16 @@
         </div>
     </div>
 
-    <!-- MODALE DE RETRAIT AVEC FRAIS DE TRANSFERT -->
+    <!-- MODALE DE RETRAIT AVEC CALCUL AUTOMATIQUE DES FRAIS (-3%) -->
     <div id="withdraw-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button type="button" onclick="closeModal('withdraw-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="font-black text-lg mb-1 text-blue-400">Faire un Retrait</h3>
-            <p class="text-red-400 text-xs font-bold mb-3 pulse-badge">Minimum retrait 3000 Ar (Frais de transfert : 200 Ar)</p>
+            <p class="text-red-400 text-xs font-bold mb-3 pulse-badge">Minimum retrait 3000 Ar (Frais de transfert : 3% du montant)</p>
             <form onsubmit="submitWithdraw(event)" class="space-y-4">
                 <div>
-                    <input type="number" id="wit-amount" placeholder="Montant (ex: 3000)" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="calculateWithdrawNet()">
-                    <p id="wit-net-info" class="text-[11px] text-gray-400 mt-1.5 font-medium">Vous recevrez : <span class="text-emerald-400 font-bold">0 Ar</span> (après 200 Ar de frais)</p>
+                    <input type="number" id="wit-amount" placeholder="Montant (ex: 4000)" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="calculateWithdrawNet()">
+                    <p id="wit-net-info" class="text-[11px] text-gray-400 mt-1.5 font-medium">Vous recevrez : <span class="text-emerald-400 font-bold">0 Ar</span> (Frais 3% : 0 Ar)</p>
                 </div>
                 <select id="wit-method" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500">
                     <option value="Orange Money">Orange Money</option>
@@ -372,7 +372,7 @@
         </div>
     </div>
 
-    <!-- MODALE PARAMÈTRES (AVEC BOUTON SUPPRESSION DE COMPTE) -->
+    <!-- MODALE PARAMÈTRES -->
     <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button type="button" onclick="closeModal('settings-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -388,7 +388,6 @@
                 <p><strong>Nom du site :</strong> BOSSMAN Mada</p>
                 <p id="set-ai-info"><strong>Aide IA :</strong> Support actif 24/7 pour vos questions.</p>
                 
-                <!-- Bouton de suppression de compte -->
                 <div class="pt-3 border-t border-gray-800">
                     <button type="button" onclick="deleteAccount()" class="w-full bg-red-600/20 hover:bg-red-600/30 border border-red-600/40 text-red-400 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">
                         <i class="fa-solid fa-user-xmark mr-2"></i> Supprimer mon compte / Fafao ny kaontiko
@@ -622,7 +621,6 @@
             }
         }
 
-        // --- SUPPRESSION DE COMPTE ---
         function deleteAccount() {
             if(!currentUser) return;
             if(confirm("Voulez-vous vraiment supprimer définitivement votre compte ? Vous pourrez vous réinscrire comme un nouveau utilisateur avec ce même numéro.")) {
@@ -648,7 +646,6 @@
             }
         }
 
-        // --- GESTION MOT DE PASSE OUBLIÉ ---
         function sendForgotPasswordCode() {
             const phone = document.getElementById('forgot-phone').value.trim();
             if(!phone || phone.length < 10) return alert('Veuillez entrer un numéro de téléphone valide.');
@@ -708,7 +705,6 @@
             }
         }
 
-        // --- GESTION DU TEST DE 7 JOURS & BONUS 1000 AR ---
         function reportTestIssue() {
             if(!currentUser) return;
             if(confirm("Voulez-vous vraiment signaler un problème sur le site ? Cela annulera votre éligibilité au bonus de test de 1 000 Ar.")) {
@@ -734,7 +730,7 @@
             }
 
             const now = Date.now();
-            const totalDurationMs = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
+            const totalDurationMs = 7 * 24 * 60 * 60 * 1000;
             const elapsed = now - currentUser.testStartDate;
             const timeLeft = totalDurationMs - elapsed;
 
@@ -800,7 +796,6 @@
             playNotificationSound();
             alert("1 000 Ar versés avec succès par l'administration !");
         }
-        // ---------------------------------------------------
 
         function handleRegister(e) {
             e.preventDefault();
@@ -1011,7 +1006,7 @@
                 if(lower.includes('depot') || lower.includes('dépôt')) {
                     reply = "Tsindrio ny kisary Dépôt, alefaso amin'ny Orange Money 0371897870 na Airtel Money 0336181891 ary andraso ny fankatoavan'ny admin.";
                 } else if(lower.includes('retrait')) {
-                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar (misy frais de transfert 200 Ar). Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
+                    reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar (misy frais 3%). Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
                 } else if(lower.includes('bonus') || lower.includes('test')) {
                     reply = "Mahazo bonus 2000 Ar amin'ny fisoratana anarana ianao, ary afaka mahazo 1 000 Ar fanampiny avy amin'ny admin raha mandalo soa aman-tsara ny fitsapana mandritra ny 7 andro tsy misy olana!";
                 }
@@ -1094,13 +1089,14 @@
             }
         }
 
+        // --- CALCUL AUTOMATIQUE EN TEMPS RÉEL DES FRAIS DE RETRAIT (-3%) ---
         function calculateWithdrawNet() {
             const amount = parseInt(document.getElementById('wit-amount').value) || 0;
-            const fee = 200;
+            const fee = Math.round(amount * 0.03); // 3% de frais calculés en temps réel
             const net = amount > fee ? amount - fee : 0;
             const netInfo = document.getElementById('wit-net-info');
             if(netInfo) {
-                netInfo.innerHTML = `Vous recevrez : <span class="text-emerald-400 font-bold">${net.toLocaleString()} Ar</span> (Frais de transfert : ${fee} Ar)`;
+                netInfo.innerHTML = `Vous recevrez : <span class="text-emerald-400 font-bold">${net.toLocaleString()} Ar</span> (Frais 3% : ${fee.toLocaleString()} Ar)`;
             }
         }
 
@@ -1109,7 +1105,7 @@
             const amount = parseInt(document.getElementById('wit-amount').value);
             const method = document.getElementById('wit-method').value;
             const phone = document.getElementById('wit-phone').value;
-            const fee = 200;
+            const fee = Math.round(amount * 0.03); // 3% de frais
 
             if(amount < 3000) return alert('Minimum retrait est de 3 000 Ar.');
             if(amount > currentUser.balance) return alert('Solde insuffisant.');
@@ -1132,7 +1128,7 @@
             });
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
             closeModal('withdraw-modal');
-            alert(`Demande de retrait soumise !\nMontant demandé : ${amount.toLocaleString()} Ar\nFrais : ${fee} Ar\nNet à recevoir : ${netAmount.toLocaleString()} Ar`);
+            alert(`Demande de retrait soumise !\nMontant demandé : ${amount.toLocaleString()} Ar\nFrais (3%) : ${fee.toLocaleString()} Ar\nNet à recevoir : ${netAmount.toLocaleString()} Ar`);
             refreshAdminBadge();
         }
 
@@ -1318,7 +1314,6 @@
                 }
             }
 
-            // Gestion de la liste des tests 7 jours dans l'admin
             const testUsersList = document.getElementById('admin-test-users-list');
             if(testUsersList) {
                 testUsersList.innerHTML = users.map(u => {
@@ -1429,8 +1424,8 @@
                             <p>💳 Méthode : <span class="text-blue-400 font-bold">${r.method}</span></p>
                             <p>📲 Tél réception : <span class="text-emerald-400 font-bold">${r.phone}</span></p>
                             <p>💰 Demandé : <span class="text-yellow-400 font-bold">${r.amount?.toLocaleString()} Ar</span></p>
-                            <p>🏷️ Frais : <span class="text-red-400 font-bold">-${r.fee || 200} Ar</span></p>
-                            <p>✅ Net à envoyer : <span class="text-emerald-400 font-bold">${r.netAmount?.toLocaleString() || (r.amount - 200)} Ar</span></p>
+                            <p>🏷️ Frais (3%) : <span class="text-red-400 font-bold">-${r.fee?.toLocaleString() || Math.round(r.amount * 0.03)} Ar</span></p>
+                            <p>✅ Net à envoyer : <span class="text-emerald-400 font-bold">${r.netAmount?.toLocaleString() || (r.amount - Math.round(r.amount * 0.03))} Ar</span></p>
                         </div>
                     ` : r.type === 'Nouvelle Inscription' ? `
                         <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
