@@ -348,6 +348,7 @@
         </div>
     </div>
 
+    <!-- MODALE PARAMÈTRES (AVEC BOUTON SUPPRESSION DE COMPTE) -->
     <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl">
             <button type="button" onclick="closeModal('settings-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -362,6 +363,13 @@
                 </div>
                 <p><strong>Nom du site :</strong> BOSSMAN Mada</p>
                 <p id="set-ai-info"><strong>Aide IA :</strong> Support actif 24/7 pour vos questions.</p>
+                
+                <!-- Bouton de suppression de compte -->
+                <div class="pt-3 border-t border-gray-800">
+                    <button type="button" onclick="deleteAccount()" class="w-full bg-red-600/20 hover:bg-red-600/30 border border-red-600/40 text-red-400 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">
+                        <i class="fa-solid fa-user-xmark mr-2"></i> Supprimer mon compte / Fafao ny kaontiko
+                    </button>
+                </div>
             </div>
             <div class="border-t border-gray-800 pt-4 text-center text-xs text-gray-500 font-medium">
                 <p>Créé par <span class="text-white font-bold">Manovo Hasambarana</span></p>
@@ -590,6 +598,35 @@
             }
         }
 
+        // --- SUPPRESSION DE COMPTE ---
+        function deleteAccount() {
+            if(!currentUser) return;
+            if(confirm("Voulez-vous vraiment supprimer définitivement votre compte ? Vous pourrez vous réinscrire comme un nouveau utilisateur avec ce même numéro.")) {
+                const phoneToDelete = currentUser.phone;
+                
+                // Supprimer de la liste des utilisateurs
+                users = users.filter(u => u.phone !== phoneToDelete);
+                localStorage.setItem('bossman_users', JSON.stringify(users));
+
+                // Nettoyer ses demandes et messages associés
+                requests = requests.filter(r => r.userPhone !== phoneToDelete);
+                localStorage.setItem('bossman_requests', JSON.stringify(requests));
+
+                messages = messages.filter(m => m.userPhone !== phoneToDelete);
+                localStorage.setItem('bossman_messages', JSON.stringify(messages));
+
+                // Déconnecter l'utilisateur actuel
+                currentUser = null;
+                localStorage.removeItem('bossman_current_user');
+
+                closeModal('settings-modal');
+                document.getElementById('dashboard-page').classList.add('hidden');
+                document.getElementById('auth-page').classList.remove('hidden');
+                
+                alert("Votre compte a été supprimé avec succès. Vous pouvez maintenant vous réinscrire comme nouveau membre.");
+            }
+        }
+
         // --- GESTION MOT DE PASSE OUBLIÉ ---
         function sendForgotPasswordCode() {
             const phone = document.getElementById('forgot-phone').value.trim();
@@ -660,6 +697,7 @@
             if(pass.length < 6) return alert('Mot de passe trop court.');
             if(users.some(u => u.phone === phone)) return alert('Ce numéro est déjà enregistré.');
 
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
             const userIndex = users.length + 1;
             const referralCode = `BOSSMAN-${String(userIndex).padStart(2, '0')}`;
             const referredBy = localStorage.getItem('bossman_pending_ref') || null;
@@ -713,6 +751,7 @@
             const phone = document.getElementById('log-phone').value;
             const pass = document.getElementById('log-pass').value;
 
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
             const user = users.find(u => u.phone === phone && u.pass === pass);
             if(!user) return alert('Numéro ou mot de passe incorrect.');
 
@@ -741,6 +780,10 @@
 
         function updateDashboardUI() {
             if(!currentUser) return;
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
+            const freshUser = users.find(u => u.phone === currentUser.phone);
+            if(freshUser) currentUser = freshUser;
+
             document.getElementById('dash-username').textContent = currentUser.name;
             document.getElementById('dash-balance').textContent = currentUser.balance + ' Ar';
             document.getElementById('ref-code-display').textContent = currentUser.referralCode;
@@ -1009,6 +1052,7 @@
 
         function saveUserData() {
             localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
             const idx = users.findIndex(u => u.phone === currentUser.phone);
             if(idx !== -1) users[idx] = currentUser;
             localStorage.setItem('bossman_users', JSON.stringify(users));
@@ -1118,16 +1162,11 @@
 
         function loadAdminData() {
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
-            messages.forEach(m => m.read = true);
-            localStorage.setItem('bossman_messages', JSON.stringify(messages));
-
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
-            requests.forEach(r => r.viewed = true);
-            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
 
             refreshAdminBadge();
 
-            // Mettre à jour les compteurs et badges de notification sur les cases admin
             const unviewedReqs = requests.filter(r => !r.viewed).length;
             const unreadMsgs = messages.filter(m => m.sender === 'user' && !m.read).length;
             const totalUsersCount = users.length;
@@ -1287,6 +1326,9 @@
         }
 
         function handleRequest(id, action) {
+            requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+            users = JSON.parse(localStorage.getItem('bossman_users')) || [];
+
             const req = requests.find(r => r.id === id);
             if(!req) return;
             const targetUser = users.find(u => u.phone === req.userPhone);
