@@ -1579,8 +1579,37 @@
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('dashboard-page').classList.remove('hidden');
                 updateDashboardUI();
+        
             }
         };
+// Exemple pour charger les utilisateurs dans l'Admin Dashboard
+async function loadAdminDashboard() {
+  const { data: users, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: false }); // Trie du plus récent au plus ancien
+
+  if (error) {
+    console.error("Erreur de chargement admin :", error.message);
+    return;
+  }
+
+  const adminContainer = document.getElementById('admin-user-list');
+  adminContainer.innerHTML = '';
+
+  users.forEach(user => {
+    adminContainer.innerHTML += `
+      <div class="user-card">
+        <p><strong>Utilisateur :</strong> ${user.username}</p>
+        <p><strong>Téléphone :</strong> ${user.phone}</p>
+        <p><strong>Parrain :</strong> ${user.parrain}</p>
+        <hr>
+      </div>
+    `;
+  });
+}
+
+        
     </script>
 </body>
 </html>
