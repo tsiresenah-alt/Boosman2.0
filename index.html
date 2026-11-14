@@ -18,9 +18,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes subtleGlow {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); }
-            100% { opacity: 0.8; }
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; text-shadow: 0 0 20px rgba(234, 179, 8, 0.7); transform: scale(1.01); }
+            100% { opacity: 0.8; transform: scale(1); }
         }
         @keyframes pulseRed {
             0% { transform: scale(1); }
@@ -32,9 +32,27 @@
             50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
+        @keyframes floatAnim {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
         .luxury-title { animation: subtleGlow 3s infinite ease-in-out; }
         .pulse-badge { animation: pulseRed 2s infinite; }
         .blinking-banner { animation: blinkRed 1s infinite; }
+        .floating-card { animation: floatAnim 4s infinite ease-in-out; }
+        
+        /* Transition fluide pour la suppression automatique */
+        .fade-out {
+            transition: all 0.8s ease-out;
+            opacity: 0;
+            transform: scale(0.95);
+            max-height: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
         body {
             background: linear-gradient(135deg, #090d16 0%, #111827 50%, #030712 100%);
         }
@@ -46,7 +64,7 @@
     <div id="app" class="flex-grow flex flex-col items-center justify-center p-4 sm:p-6">
         
         <!-- PAGE 1: AUTHENTIFICATION -->
-        <div id="auth-page" class="w-full max-w-md bg-gray-900/80 backdrop-blur-xl border border-gray-800/80 rounded-3xl p-8 shadow-2xl shadow-black/60">
+        <div id="auth-page" class="w-full max-w-md bg-gray-900/80 backdrop-blur-xl border border-gray-800/80 rounded-3xl p-8 shadow-2xl shadow-black/60 transition-all duration-500">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-black tracking-wider luxury-title bg-gradient-to-r from-yellow-400 via-amber-200 to-yellow-500 bg-clip-text text-transparent mb-2">BOSSMAN Mada</h1>
                 <p id="txt-welcome" class="text-gray-400 text-xs font-medium tracking-wide">BIENVENUE - Gagnez de l'argent en ligne avec élégance</p>
@@ -106,24 +124,24 @@
         </div>
 
         <!-- PAGE 2: TABLEAU DE BORD -->
-        <div id="dashboard-page" class="w-full max-w-2xl bg-gray-900/80 backdrop-blur-xl border border-gray-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/60 hidden">
+        <div id="dashboard-page" class="w-full max-w-2xl bg-gray-900/80 backdrop-blur-xl border border-gray-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/60 hidden transition-all duration-500">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800/80 pb-5">
                 <div>
                     <h2 id="dash-username" class="text-2xl font-black text-white tracking-wide">Nom d'utilisateur</h2>
                     <p class="text-xs text-gray-400 mt-0.5">Solde principal : <span id="dash-balance" class="text-yellow-400 font-extrabold text-sm">0 Ar</span></p>
                 </div>
                 <div class="flex items-center space-x-2.5">
-                    <button type="button" onclick="openModal('support-chat-modal')" id="btn-support" class="relative bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 p-3 rounded-2xl text-red-400 transition-all duration-300" title="Support Admin">
+                    <button type="button" onclick="openModal('support-chat-modal')" id="btn-support" class="relative bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 p-3 rounded-2xl text-red-400 transition-all duration-300 transform hover:scale-105" title="Support Admin">
                         <i class="fa-solid fa-headset text-sm"></i>
                         <span id="user-msg-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md pulse-badge">0</span>
                     </button>
-                    <button type="button" onclick="openModal('ai-chat-modal')" class="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 p-3 rounded-2xl text-indigo-400 transition-all duration-300" title="Assistant IA">
+                    <button type="button" onclick="openModal('ai-chat-modal')" class="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 p-3 rounded-2xl text-indigo-400 transition-all duration-300 transform hover:scale-105" title="Assistant IA">
                         <i class="fa-solid fa-robot text-sm"></i>
                     </button>
-                    <button type="button" onclick="openSettings()" class="bg-gray-800/60 hover:bg-gray-800 border border-gray-700/60 p-3 rounded-2xl text-gray-300 transition-all duration-300" title="Paramètres">
+                    <button type="button" onclick="openSettings()" class="bg-gray-800/60 hover:bg-gray-800 border border-gray-700/60 p-3 rounded-2xl text-gray-300 transition-all duration-300 transform hover:scale-105" title="Paramètres">
                         <i class="fa-solid fa-gear text-sm"></i>
                     </button>
-                    <button type="button" onclick="logout()" class="bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 p-3 rounded-2xl text-red-400 transition-all duration-300" title="Déconnecter">
+                    <button type="button" onclick="logout()" class="bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 p-3 rounded-2xl text-red-400 transition-all duration-300 transform hover:scale-105" title="Déconnecter">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
                     </button>
                 </div>
@@ -131,25 +149,25 @@
 
             <!-- Actions Rapides -->
             <div class="grid grid-cols-4 gap-3 mb-6">
-                <button type="button" onclick="openModal('deposit-modal')" id="btn-deposit" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
+                <button type="button" onclick="openModal('deposit-modal')" id="btn-deposit" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden shadow-md">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-wallet text-emerald-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Dépôt</span>
                 </button>
-                <button type="button" onclick="openModal('withdraw-modal')" id="btn-withdraw" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
+                <button type="button" onclick="openModal('withdraw-modal')" id="btn-withdraw" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden shadow-md">
                     <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-money-bill-transfer text-blue-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Retrait</span>
                 </button>
-                <button type="button" onclick="openModal('referral-modal')" id="btn-referral" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-yellow-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
+                <button type="button" onclick="openModal('referral-modal')" id="btn-referral" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-yellow-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden shadow-md">
                     <div class="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-users text-yellow-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Parrainage</span>
                 </button>
-                <button type="button" onclick="openModal('history-modal')" id="btn-history" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
+                <button type="button" onclick="openModal('history-modal')" id="btn-history" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden shadow-md">
                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-clock-rotate-left text-purple-400 text-base"></i>
                     </div>
@@ -157,17 +175,17 @@
                 </button>
             </div>
 
-            <!-- BLOC TEST DU SITE & SIGNALEMENT DE BUG (1 000 AR) -->
-            <div class="bg-gray-950/60 border border-yellow-500/30 p-5 rounded-2xl mb-6 shadow-lg">
+            <!-- BLOC TEST DU SITE AVEC HORLOGE 24H ET EXPIRATION AUTOMATIQUE -->
+            <div id="test-24h-banner" class="bg-gradient-to-r from-gray-950/90 via-gray-900/90 to-amber-950/30 border border-yellow-500/40 p-5 rounded-2xl mb-6 shadow-xl floating-card">
                 <div class="flex justify-between items-center mb-2">
                     <h4 class="font-bold text-yellow-400 text-sm flex items-center space-x-2">
-                        <i class="fa-solid fa-bug"></i> <span>Test du site & Rapport de Bug</span>
+                        <i class="fa-solid fa-stopwatch text-base text-yellow-400 animate-pulse"></i> <span>Session Test (Horloge 24h)</span>
                     </h4>
-                    <span class="bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider">Actif</span>
+                    <span id="test-clock-display" class="bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 text-xs font-mono font-black px-3 py-1 rounded-full tracking-widest shadow-md">24:00:00</span>
                 </div>
-                <p class="text-xs text-gray-300 mb-3">Trouvez un problème, envoyez un commentaire et une capture d'écran à l'administration pour recevoir <strong class="text-emerald-400">1 000 Ar</strong> de récompense après validation par l'admin !</p>
-                <button type="button" onclick="openModal('bug-report-modal')" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Signaler un problème (Commentaire + Capture)</span>
+                <p class="text-xs text-gray-300 mb-3">Testez le site pendant 24h. Envoyez un commentaire et une capture d'écran d'un bug pour recevoir automatiquement <strong class="text-emerald-400">1 000 Ar</strong> approuvé par l'admin !</p>
+                <button type="button" onclick="openModal('bug-report-modal')" class="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-yellow-500/20 flex items-center justify-center space-x-2 transform active:scale-95">
+                    <i class="fa-solid fa-bug"></i> <span>Signaler un problème (Commentaire + Capture)</span>
                 </button>
             </div>
 
@@ -719,6 +737,45 @@
             }
         }
 
+        // --- GESTION DE L'HORLOGE 24H ET EXPIRATION DU TEST ---
+        function updateTest24hClock() {
+            if(!currentUser) return;
+            const banner = document.getElementById('test-24h-banner');
+            if(!banner) return;
+
+            // Initialiser l'heure de début du test (24h) si non existante
+            if(!currentUser.testStartTime) {
+                currentUser.testStartTime = Date.now();
+                saveUserData();
+            }
+
+            const now = Date.now();
+            const duration24hMs = 24 * 60 * 60 * 1000; // 24 heures
+            const elapsed = now - currentUser.testStartTime;
+            const timeLeft = duration24hMs - elapsed;
+
+            const clockDisplay = document.getElementById('test-clock-display');
+
+            if(timeLeft <= 0) {
+                if(clockDisplay) clockDisplay.textContent = "00:00:00 (Expiré)";
+                // Suppression automatique avec animation de fondu
+                if(!banner.classList.contains('fade-out')) {
+                    banner.classList.add('fade-out');
+                    setTimeout(() => {
+                        banner.style.display = 'none';
+                    }, 800);
+                }
+            } else {
+                let sec = Math.floor(timeLeft / 1000);
+                let h = Math.floor(sec / 3600);
+                let m = Math.floor((sec % 3600) / 60);
+                let s = sec % 60;
+                if(clockDisplay) {
+                    clockDisplay.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                }
+            }
+        }
+
         // --- SOUMISSION DU RAPPORT DE BUG (TEST) ---
         function submitBugReport(e) {
             e.preventDefault();
@@ -778,6 +835,7 @@
                 referralCode,
                 referredBy,
                 activeSub: null,
+                testStartTime: Date.now(), // Démarrage des 24h
                 history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
             };
 
@@ -861,6 +919,7 @@
 
             renderSubscriptionsList();
             updateSectionUI();
+            updateTest24hClock();
 
             const subBanner = document.getElementById('active-sub-banner');
             if(currentUser.activeSub) {
@@ -962,7 +1021,7 @@
                 } else if(lower.includes('retrait')) {
                     reply = "Ny kely indrindra amin'ny retrait dia 3000 Ar (misy frais 10%). Fenoy ny fangatahana dia hankatoavin'ny admin izany.";
                 } else if(lower.includes('bug') || lower.includes('problème') || lower.includes('test')) {
-                    reply = "Tsindrio ny bokotra 'Signaler un problème', soraty ny commentaire ary alefaso ny capture d'écran. Raha ankatoavin'ny admin dia mahazo 1 000 Ar ianao!";
+                    reply = "Tsindrio ny bokotra 'Signaler un problème', soraty ny commentaire ary alefaso ny capture d'écran. Raha ankatoavin'ny admin dia mahazo 1 000 Ar ianao mandritra ny 24 ora test!";
                 }
 
                 chatBox.innerHTML += `<div class="bg-gray-800 border border-gray-700/60 p-3 rounded-2xl max-w-[85%] text-gray-200 shadow-sm"><strong>IA:</strong> ${reply}</div>`;
@@ -1132,6 +1191,8 @@
             refreshAdminBadge();
             if(!currentUser) return;
             const now = Date.now();
+
+            updateTest24hClock();
 
             if(currentUser.activeSub) {
                 if(!currentUser.activeSub.nextPayoutAt || isNaN(currentUser.activeSub.nextPayoutAt)) {
@@ -1430,7 +1491,7 @@
                     targetUser.balance -= req.amount;
                     targetUser.history.push({type: `Retrait approuvé (${req.method})`, amount: -req.amount, date: new Date().toLocaleString()});
                 } else if(req.type === 'Rapport de Bug' && targetUser) {
-                    targetUser.balance += 1000; // Ajout automatique de 1000 Ar validé par l'admin
+                    targetUser.balance += 1000;
                     targetUser.history.push({type: 'Récompense Test / Bug approuvé', amount: 1000, date: new Date().toLocaleString()});
                 } else if(req.type === 'Nouveau Filleul') {
                     if(targetUser) {
