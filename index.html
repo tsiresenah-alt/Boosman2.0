@@ -102,7 +102,7 @@
                     <p class="text-xs text-gray-400 mt-0.5">Solde principal : <span id="dash-balance" class="text-yellow-400 font-extrabold text-sm">0 Ar</span></p>
                 </div>
                 <div class="flex items-center space-x-2.5">
-                    <button onclick="openModal('support-chat-modal')" class="relative bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 p-3 rounded-2xl text-red-400 transition-all duration-300" title="Support Admin">
+                    <button onclick="openModal('support-chat-modal')" id="btn-support" class="relative bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 p-3 rounded-2xl text-red-400 transition-all duration-300" title="Support Admin">
                         <i class="fa-solid fa-headset text-sm"></i>
                         <span id="user-msg-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md pulse-badge">0</span>
                     </button>
@@ -120,25 +120,25 @@
 
             <!-- Actions Rapides -->
             <div class="grid grid-cols-4 gap-3 mb-6">
-                <button onclick="openModal('deposit-modal')" class="bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group">
+                <button onclick="openModal('deposit-modal')" id="btn-deposit" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-wallet text-emerald-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Dépôt</span>
                 </button>
-                <button onclick="openModal('withdraw-modal')" class="bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group">
+                <button onclick="openModal('withdraw-modal')" id="btn-withdraw" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
                     <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-money-bill-transfer text-blue-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Retrait</span>
                 </button>
-                <button onclick="openModal('referral-modal')" class="bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-yellow-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group">
+                <button onclick="openModal('referral-modal')" id="btn-referral" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-yellow-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
                     <div class="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-users text-yellow-400 text-base"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Parrainage</span>
                 </button>
-                <button onclick="openModal('history-modal')" class="bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group">
+                <button onclick="openModal('history-modal')" id="btn-history" class="relative bg-gray-950/60 hover:bg-gray-800/80 border border-gray-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 group overflow-hidden">
                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-clock-rotate-left text-purple-400 text-base"></i>
                     </div>
@@ -159,7 +159,7 @@
                 </div>
             </div>
 
-            <!-- 5 Abonnements exacts -->
+            <!-- Abonnements -->
             <h3 class="font-extrabold text-sm uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-gem text-yellow-500"></i> <span>ABONNEMENTS Disponibles</span>
             </h3>
@@ -177,11 +177,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-6">
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Gestion des Mises à Jour (ABONNEMENTS)</h3>
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Maintenance Sections / Boutons</h3>
+                        <div id="admin-section-maintenance-list" class="space-y-2 text-xs"></div>
+                    </div>
+                    <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-yellow-400">🛠️ Maintenance ABONNEMENTS</h3>
                         <div id="admin-sub-maintenance-list" class="space-y-2 text-xs"></div>
                     </div>
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Utilisateurs inscrits & ABONNEMENTS</h3>
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Utilisateurs & ABONNEMENTS</h3>
                         <div id="admin-users-list" class="space-y-3 max-h-60 overflow-y-auto text-xs pr-1"></div>
                     </div>
                 </div>
@@ -328,6 +332,16 @@
         let requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
         let messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
         let subMaintenance = JSON.parse(localStorage.getItem('bossman_sub_maintenance')) || {1: false, 2: false, 3: false, 4: false, 5: false};
+        
+        // Maintenance pour chaque section / bouton
+        let sectionMaintenance = JSON.parse(localStorage.getItem('bossman_section_maintenance')) || {
+            deposit: false,
+            withdraw: false,
+            referral: false,
+            history: false,
+            support: false
+        };
+
         let currentLang = localStorage.getItem('bossman_lang') || 'fr';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -386,6 +400,36 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.5);
             } catch(e) {}
+        }
+
+        function updateSectionUI() {
+            // Met à jour l'apparence des boutons rapides selon leur statut de maintenance
+            const sections = [
+                { key: 'deposit', id: 'btn-deposit', name: 'Dépôt' },
+                { key: 'withdraw', id: 'btn-withdraw', name: 'Retrait' },
+                { key: 'referral', id: 'btn-referral', name: 'Parrainage' },
+                { key: 'history', id: 'btn-history', name: 'Histoire' },
+                { key: 'support', id: 'btn-support', name: 'Support' }
+            ];
+
+            sections.forEach(s => {
+                const el = document.getElementById(s.id);
+                if(!el) return;
+                const isMaint = sectionMaintenance[s.key];
+                if(isMaint) {
+                    el.classList.add('border-red-500', 'bg-red-950/40');
+                    if(!el.querySelector('.maint-tag')) {
+                        const tag = document.createElement('div');
+                        tag.className = 'maint-tag absolute inset-0 bg-red-950/90 flex items-center justify-center p-1 text-[9px] font-black text-white text-center uppercase blinking-banner z-10 rounded-2xl';
+                        tag.innerHTML = `<span>MAINTENANCE</span>`;
+                        el.appendChild(tag);
+                    }
+                } else {
+                    el.classList.remove('border-red-500', 'bg-red-950/40');
+                    const tag = el.querySelector('.maint-tag');
+                    if(tag) tag.remove();
+                }
+            });
         }
 
         function renderSubscriptionsList() {
@@ -568,6 +612,7 @@
             document.getElementById('ref-link-input').value = realLink;
 
             renderSubscriptionsList();
+            updateSectionUI();
 
             const subBanner = document.getElementById('active-sub-banner');
             if(currentUser.activeSub) {
@@ -604,6 +649,23 @@
         }
 
         function openModal(id) { 
+            // Vérification de maintenance par section
+            if(id === 'deposit-modal' && sectionMaintenance.deposit) {
+                return alert("⚠️ Le service de Dépôt est actuellement en cours de mise à jour par l'administrateur.");
+            }
+            if(id === 'withdraw-modal' && sectionMaintenance.withdraw) {
+                return alert("⚠️ Le service de Retrait est actuellement en cours de mise à jour par l'administrateur.");
+            }
+            if(id === 'referral-modal' && sectionMaintenance.referral) {
+                return alert("⚠️ La section Parrainage est actuellement en cours de mise à jour par l'administrateur.");
+            }
+            if(id === 'history-modal' && sectionMaintenance.history) {
+                return alert("⚠️ L'historique est actuellement en cours de mise à jour par l'administrateur.");
+            }
+            if(id === 'support-chat-modal' && sectionMaintenance.support) {
+                return alert("⚠️ Le Support direct admin est actuellement en cours de mise à jour par l'administrateur.");
+            }
+
             document.getElementById(id).classList.remove('hidden'); 
             if(id === 'support-chat-modal') {
                 loadUserSupportChat();
@@ -888,11 +950,41 @@
             alert(`Statut de mise à jour modifié pour l'ABONNEMENT ${subId}.`);
         }
 
+        function toggleSectionMaintenance(sectionKey) {
+            sectionMaintenance[sectionKey] = !sectionMaintenance[sectionKey];
+            localStorage.setItem('bossman_section_maintenance', JSON.stringify(sectionMaintenance));
+            loadAdminData();
+            updateSectionUI();
+            playNotificationSound();
+            alert(`Statut de maintenance modifié pour la section ${sectionKey}.`);
+        }
+
         function loadAdminData() {
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
             messages.forEach(m => m.read = true);
             localStorage.setItem('bossman_messages', JSON.stringify(messages));
             refreshAdminBadge();
+
+            // Gestion maintenance des sections/boutons rapides
+            const secMaintList = document.getElementById('admin-section-maintenance-list');
+            const sectionLabels = {
+                deposit: 'Dépôt',
+                withdraw: 'Retrait',
+                referral: 'Parrainage',
+                history: 'Histoire',
+                support: 'Support Admin'
+            };
+            secMaintList.innerHTML = Object.keys(sectionMaintenance).map(key => {
+                const isMaint = sectionMaintenance[key];
+                return `
+                    <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-2.5 rounded-xl">
+                        <span class="font-bold text-white">${sectionLabels[key] || key}</span>
+                        <button onclick="toggleSectionMaintenance('${key}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${isMaint ? 'bg-red-600 hover:bg-red-500 text-white blinking-banner' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}">
+                            ${isMaint ? 'En Maj (Actif)' : 'Normal (Actif)'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
 
             // Gestion maintenance abonnements admin
             const subMaintList = document.getElementById('admin-sub-maintenance-list');
@@ -1052,6 +1144,7 @@
             applyLanguage();
             refreshAdminBadge();
             renderSubscriptionsList();
+            updateSectionUI();
             if(refFromUrl) {
                 const notice = document.getElementById('ref-notice');
                 if(notice) {
