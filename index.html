@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOSSMAN Mada</title>
+    
+    <!-- Balises Open Graph pour l'aperçu Facebook et Messenger -->
+    <meta property="og:title" content="BOSSMAN Mada - Gagnez de l'argent en ligne">
+    <meta property="og:description" content="Rejoignez BOSSMAN Mada, choisissez votre abonnement et gagnez des revenus en ligne à Madagascar.">
+    <meta property="og:image" content="https://tsiresenah-alt.github.io/Boosman2.0/preview_image.png">
+    <meta property="og:url" content="https://tsiresenah-alt.github.io/Boosman2.0/">
+    <meta property="og:type" content="website">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -190,7 +198,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Demandes (Dépôts / Retraits)</h3>
+                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Demandes (Dépôts / Retraits / Inscriptions)</h3>
                     <div id="admin-requests-list" class="space-y-3 max-h-[500px] overflow-y-auto text-xs pr-1"></div>
                 </div>
                 <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md flex flex-col">
@@ -333,7 +341,6 @@
         let messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
         let subMaintenance = JSON.parse(localStorage.getItem('bossman_sub_maintenance')) || {1: false, 2: false, 3: false, 4: false, 5: false};
         
-        // Maintenance pour chaque section / bouton
         let sectionMaintenance = JSON.parse(localStorage.getItem('bossman_section_maintenance')) || {
             deposit: false,
             withdraw: false,
@@ -403,7 +410,6 @@
         }
 
         function updateSectionUI() {
-            // Met à jour l'apparence des boutons rapides selon leur statut de maintenance
             const sections = [
                 { key: 'deposit', id: 'btn-deposit', name: 'Dépôt' },
                 { key: 'withdraw', id: 'btn-withdraw', name: 'Retrait' },
@@ -553,9 +559,20 @@
             users.push(newUser);
             localStorage.setItem('bossman_users', JSON.stringify(users));
 
+            // Ajouter une notification de nouvelle inscription dans les demandes admin
+            requests.push({
+                id: Date.now(),
+                type: 'Nouvelle Inscription',
+                userName: name,
+                userPhone: phone,
+                amount: 0,
+                status: 'Nouveau Membre'
+            });
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+
             if(referredBy) {
                 requests.push({
-                    id: Date.now(),
+                    id: Date.now() + 1,
                     type: 'Nouveau Filleul',
                     userName: name,
                     userPhone: phone,
@@ -649,7 +666,6 @@
         }
 
         function openModal(id) { 
-            // Vérification de maintenance par section
             if(id === 'deposit-modal' && sectionMaintenance.deposit) {
                 return alert("⚠️ Le service de Dépôt est actuellement en cours de mise à jour par l'administrateur.");
             }
@@ -1025,7 +1041,7 @@
             reqList.innerHTML = requests.map(r => `
                 <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm">
                     <div class="flex justify-between items-center">
-                        <p class="font-black text-white text-xs">${r.type} - ${r.userName} : <span class="text-emerald-400 font-black">${r.amount} Ar</span></p>
+                        <p class="font-black text-white text-xs">${r.type} - ${r.userName} : <span class="text-emerald-400 font-black">${r.amount ? r.amount + ' Ar' : r.userPhone}</span></p>
                         <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300 border border-gray-700">${r.status}</span>
                     </div>
                     ${r.type === 'Dépôt' ? `
@@ -1039,6 +1055,11 @@
                         <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
                             <p>💳 Méthode : <span class="text-blue-400 font-bold">${r.method}</span></p>
                             <p>📲 Tél réception : <span class="text-emerald-400 font-bold">${r.phone}</span></p>
+                        </div>
+                    ` : r.type === 'Nouvelle Inscription' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
+                            <p>📱 Numéro de téléphone : <span class="text-yellow-400 font-bold">${r.userPhone}</span></p>
+                            <p>✨ Statut : <span class="text-emerald-400 font-bold">Nouveau membre inscrit avec bonus 2000 Ar</span></p>
                         </div>
                     ` : `
                         <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl border border-gray-800">
