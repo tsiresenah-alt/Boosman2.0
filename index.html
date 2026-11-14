@@ -1127,4 +1127,197 @@
                 history: 'Histoire',
                 support: 'Support Admin'
             };
-            secMaintList.innerHTML = Object.keys(sectionMaintenance).
+            secMaintList.innerHTML = Object.keys(sectionMaintenance).map(key => {
+                const isMaint = sectionMaintenance[key];
+                return `
+                    <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-2.5 rounded-xl">
+                        <span class="font-bold text-white">${sectionLabels[key] || key}</span>
+                        <button type="button" onclick="toggleSectionMaintenance('${key}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${isMaint ? 'bg-red-600 hover:bg-red-500 text-white blinking-banner' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}">
+                            ${isMaint ? 'En Maj (Actif)' : 'Normal (Actif)'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const subMaintList = document.getElementById('admin-sub-maintenance-list');
+            subMaintList.innerHTML = subscriptionsData.map(sub => {
+                const isMaint = subMaintenance[sub.id];
+                return `
+                    <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-2.5 rounded-xl">
+                        <span class="font-bold text-white">${sub.name}</span>
+                        <button type="button" onclick="toggleSubMaintenance(${sub.id})" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${isMaint ? 'bg-red-600 hover:bg-red-500 text-white blinking-banner' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}">
+                            ${isMaint ? 'En Maj (Actif)' : 'Normal (Actif)'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const usersList = document.getElementById('admin-users-list');
+            usersList.innerHTML = users.map(u => {
+                let subInfo = '<span class="text-gray-500 font-medium">Aucun abonnement actif</span>';
+                if(u.activeSub) {
+                    const now = Date.now();
+                    const daysLeft = Math.max(0, Math.ceil((u.activeSub.expiresAt - now) / (24 * 60 * 60 * 1000)));
+                    const nextPayoutLeft = Math.max(0, Math.floor((u.activeSub.nextPayoutAt - now) / 1000));
+                    let h = Math.floor(nextPayoutLeft / 3600);
+                    let m = Math.floor((nextPayoutLeft % 3600) / 60);
+                    let s = nextPayoutLeft % 60;
+                    subInfo = `<span class="text-emerald-400 font-extrabold">${u.activeSub.name}</span> | Jours : <span class="text-yellow-400 font-bold">${daysLeft} j</span> | Versement : <span class="text-cyan-400 font-mono font-bold">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>`;
+                }
+                return `
+                    <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-1.5 shadow-sm">
+                        <p class="font-black text-white text-xs">${u.name} <span class="text-gray-400 font-normal">(${u.phone})</span></p>
+                        <p class="text-gray-400 text-[11px]">Code: <span class="text-gray-200 font-bold">${u.referralCode}</span> | Solde: <span class="text-yellow-400 font-black">${u.balance} Ar</span></p>
+                        <div class="bg-gray-950 p-2 rounded-xl text-[10px] mt-1 border border-gray-800">${subInfo}</div>
+                    </div>
+                `;
+            }).join('') || '<p class="text-gray-500 text-center py-4">Aucun utilisateur</p>';
+
+            const reqList = document.getElementById('admin-requests-list');
+            reqList.innerHTML = requests.map(r => `
+                <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <p class="font-black text-white text-xs">${r.type} - ${r.userName} : <span class="text-emerald-400 font-black">${r.amount ? r.amount + ' Ar' : r.userPhone}</span></p>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300 border border-gray-700">${r.status}</span>
+                    </div>
+                    ${r.type === 'Dépôt' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
+                            <p>📞 Tél expéditeur : <span class="text-orange-400 font-bold">${r.phone}</span></p>
+                            <p>🔢 Référence SMS : <span class="text-yellow-400 font-bold">${r.ref}</span></p>
+                            <p class="font-bold text-gray-200 pt-1">🖼️ Image / Justificatif :</p>
+                            ${r.proofDataUrl ? `<div class="mt-1"><img src="${r.proofDataUrl}" alt="Justificatif de dépôt" class="w-full h-auto max-h-40 rounded-xl border border-gray-800 object-contain bg-black"></div>` : `<span class="text-gray-500">Aucune image</span>`}
+                        </div>
+                    ` : r.type === 'Retrait' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
+                            <p>💳 Méthode : <span class="text-blue-400 font-bold">${r.method}</span></p>
+                            <p>📲 Tél réception : <span class="text-emerald-400 font-bold">${r.phone}</span></p>
+                            <p>💰 Demandé : <span class="text-yellow-400 font-bold">${r.amount?.toLocaleString()} Ar</span></p>
+                            <p>🏷️ Frais : <span class="text-red-400 font-bold">-${r.fee || 200} Ar</span></p>
+                            <p>✅ Net à envoyer : <span class="text-emerald-400 font-bold">${r.netAmount?.toLocaleString() || (r.amount - 200)} Ar</span></p>
+                        </div>
+                    ` : r.type === 'Nouvelle Inscription' ? `
+                        <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl space-y-1 border border-gray-800">
+                            <p>📱 Numéro de téléphone : <span class="text-yellow-400 font-bold">${r.userPhone}</span></p>
+                            <p>✨ Statut : <span class="text-emerald-400 font-bold">Nouveau membre inscrit avec bonus 2000 Ar</span></p>
+                        </div>
+                    ` : `
+                        <div class="text-[11px] text-gray-300 bg-gray-950 p-2.5 rounded-xl border border-gray-800">
+                            <p>Parrain code : <span class="text-yellow-400 font-bold">${r.refCode}</span></p>
+                        </div>
+                    `}
+                    ${r.status.includes('En attente') ? `
+                        <div class="flex space-x-2 pt-1">
+                            <button type="button" onclick="handleRequest(${r.id}, 'Valider')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-white font-black text-xs uppercase tracking-wider transition shadow-md">Valider</button>
+                            <button type="button" onclick="handleRequest(${r.id}, 'Refuser')" class="flex-1 bg-red-600 hover:bg-red-500 py-2 rounded-xl text-white font-black text-xs uppercase tracking-wider transition shadow-md">Refuser</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('') || '<p class="text-gray-500 text-center py-4">Aucune demande</p>';
+
+            const supportList = document.getElementById('admin-support-list');
+            supportList.innerHTML = messages.length ? messages.map(m => `
+                <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2 shadow-sm">
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 font-medium">
+                        <span class="font-bold text-white">${m.userName} (${m.userPhone})</span>
+                        <span>${m.date}</span>
+                    </div>
+                    <p class="text-gray-200 text-xs bg-gray-950 p-2.5 rounded-xl border border-gray-800">${m.text}</p>
+                    <div class="flex space-x-2 pt-1">
+                        <input type="text" id="admin-reply-${m.id}" placeholder="Répondre..." class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        <button type="button" onclick="sendAdminReply('${m.userPhone}', ${m.id})" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition">Répondre</button>
+                    </div>
+                </div>
+            `).reverse().join('') : '<p class="text-gray-500 text-center py-6">Aucun message de support</p>';
+        }
+
+        function sendAdminReply(userPhone, msgId) {
+            const input = document.getElementById(`admin-reply-${msgId}`);
+            const text = input ? input.value.trim() : '';
+            if(!text) return;
+
+            messages.push({
+                id: Date.now(),
+                userPhone: userPhone,
+                userName: 'Admin',
+                sender: 'admin',
+                text: text,
+                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                read: false
+            });
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+            loadAdminData();
+            playNotificationSound();
+            alert('Réponse envoyée avec succès !');
+        }
+
+        function handleRequest(id, action) {
+            const req = requests.find(r => r.id === id);
+            if(!req) return;
+            const targetUser = users.find(u => u.phone === req.userPhone);
+
+            if(action === 'Valider') {
+                req.status = 'Validé (Vert)';
+                if(req.type === 'Dépôt' && targetUser) {
+                    targetUser.balance += req.amount;
+                    targetUser.history.push({type: 'Dépôt approuvé', amount: req.amount, date: new Date().toLocaleString()});
+
+                    if(targetUser.referredBy) {
+                        const sponsor = users.find(u => u.referralCode === targetUser.referredBy);
+                        if(sponsor) {
+                            const sponsorBonus = Math.round(req.amount * 0.005);
+                            sponsor.balance += sponsorBonus;
+                            sponsor.history.push({
+                                type: `Bonus parrainage (0.5% dépôt de ${targetUser.name})`,
+                                amount: sponsorBonus,
+                                date: new Date().toLocaleString()
+                            });
+                        }
+                    }
+                } else if(req.type === 'Retrait' && targetUser) {
+                    targetUser.balance -= req.amount;
+                    targetUser.history.push({type: `Retrait approuvé (${req.method})`, amount: -req.amount, date: new Date().toLocaleString()});
+                } else if(req.type === 'Nouveau Filleul') {
+                    if(targetUser) {
+                        targetUser.balance += 1000;
+                        targetUser.history.push({type: 'Bonus parrain approuvé', amount: 1000, date: new Date().toLocaleString()});
+                    }
+                }
+            } else {
+                req.status = 'Refusé (Rouge)';
+            }
+
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
+            localStorage.setItem('bossman_users', JSON.stringify(users));
+
+            if(currentUser && targetUser && currentUser.phone === targetUser.phone) {
+                currentUser = targetUser;
+                localStorage.setItem('bossman_current_user', JSON.stringify(currentUser));
+                updateDashboardUI();
+            }
+
+            loadAdminData();
+            refreshAdminBadge();
+            playNotificationSound();
+        }
+
+        window.onload = function() {
+            applyLanguage();
+            refreshAdminBadge();
+            renderSubscriptionsList();
+            updateSectionUI();
+            if(refFromUrl) {
+                const notice = document.getElementById('ref-notice');
+                if(notice) {
+                    notice.textContent = `Invitation détectée (Parrain : ${refFromUrl})`;
+                    notice.classList.remove('hidden');
+                }
+            }
+            if(currentUser) {
+                document.getElementById('auth-page').classList.add('hidden');
+                document.getElementById('dashboard-page').classList.remove('hidden');
+                updateDashboardUI();
+            }
+        };
+    </script>
+</body>
+</html>
