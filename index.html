@@ -52,7 +52,6 @@
                 <p id="txt-welcome" class="text-gray-400 text-xs font-medium tracking-wide">BIENVENUE - Gagnez de l'argent en ligne avec élégance</p>
             </div>
 
-            <!-- Onglets Inscription / Connexion -->
             <div class="flex bg-gray-950/60 p-1 rounded-xl border border-gray-800/60 mb-6">
                 <button type="button" onclick="switchTab('register')" id="tab-register-btn" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-300 bg-yellow-500 text-black shadow-lg">Inscription</button>
                 <button type="button" onclick="switchTab('login')" id="tab-login-btn" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-300 text-gray-400 hover:text-white">Connexion</button>
@@ -197,16 +196,25 @@
                         <div id="admin-sub-maintenance-list" class="space-y-2 text-xs"></div>
                     </div>
                     <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Utilisateurs & ABONNEMENTS</h3>
+                        <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400 flex justify-between items-center">
+                            <span>Utilisateurs & ABONNEMENTS</span>
+                            <span id="admin-users-count-badge" class="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                        </h3>
                         <div id="admin-users-list" class="space-y-3 max-h-60 overflow-y-auto text-xs pr-1"></div>
                     </div>
                 </div>
                 <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md">
-                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">Demandes (Dépôts / Retraits / Inscriptions)</h3>
+                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400 flex justify-between items-center">
+                        <span>Demandes (Dépôts / Retraits...)</span>
+                        <span id="admin-requests-count-badge" class="hidden bg-red-600 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold pulse-badge">0</span>
+                    </h3>
                     <div id="admin-requests-list" class="space-y-3 max-h-[500px] overflow-y-auto text-xs pr-1"></div>
                 </div>
                 <div class="bg-gray-950/60 border border-gray-800 p-5 rounded-2xl shadow-md flex flex-col">
-                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400">💬 Messages Support</h3>
+                    <h3 class="font-bold mb-3 text-xs uppercase tracking-wider text-gray-400 flex justify-between items-center">
+                        <span>💬 Messages Support</span>
+                        <span id="admin-support-count-badge" class="hidden bg-red-600 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold pulse-badge">0</span>
+                    </h3>
                     <div id="admin-support-list" class="flex-grow space-y-3 max-h-[500px] overflow-y-auto text-xs pr-1"></div>
                 </div>
             </div>
@@ -1118,6 +1126,34 @@
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
 
             refreshAdminBadge();
+
+            // Mettre à jour les compteurs et badges de notification sur les cases admin
+            const unviewedReqs = requests.filter(r => !r.viewed).length;
+            const unreadMsgs = messages.filter(m => m.sender === 'user' && !m.read).length;
+            const totalUsersCount = users.length;
+
+            const userCountBadge = document.getElementById('admin-users-count-badge');
+            if(userCountBadge) userCountBadge.textContent = totalUsersCount + ' utilisateur(s)';
+
+            const reqCountBadge = document.getElementById('admin-requests-count-badge');
+            if(reqCountBadge) {
+                if(unviewedReqs > 0) {
+                    reqCountBadge.textContent = unviewedReqs;
+                    reqCountBadge.classList.remove('hidden');
+                } else {
+                    reqCountBadge.classList.add('hidden');
+                }
+            }
+
+            const supportCountBadge = document.getElementById('admin-support-count-badge');
+            if(supportCountBadge) {
+                if(unreadMsgs > 0) {
+                    supportCountBadge.textContent = unreadMsgs;
+                    supportCountBadge.classList.remove('hidden');
+                } else {
+                    supportCountBadge.classList.add('hidden');
+                }
+            }
 
             const secMaintList = document.getElementById('admin-section-maintenance-list');
             const sectionLabels = {
