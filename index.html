@@ -42,7 +42,6 @@
         .blinking-banner { animation: blinkRed 1s infinite; }
         .floating-card { animation: floatAnim 4s infinite ease-in-out; }
         
-        /* Transition fluide pour la suppression automatique */
         .fade-out {
             transition: all 0.8s ease-out;
             opacity: 0;
@@ -743,14 +742,13 @@
             const banner = document.getElementById('test-24h-banner');
             if(!banner) return;
 
-            // Initialiser l'heure de début du test (24h) si non existante
             if(!currentUser.testStartTime) {
                 currentUser.testStartTime = Date.now();
                 saveUserData();
             }
 
             const now = Date.now();
-            const duration24hMs = 24 * 60 * 60 * 1000; // 24 heures
+            const duration24hMs = 24 * 60 * 60 * 1000;
             const elapsed = now - currentUser.testStartTime;
             const timeLeft = duration24hMs - elapsed;
 
@@ -758,7 +756,6 @@
 
             if(timeLeft <= 0) {
                 if(clockDisplay) clockDisplay.textContent = "00:00:00 (Expiré)";
-                // Suppression automatique avec animation de fondu
                 if(!banner.classList.contains('fade-out')) {
                     banner.classList.add('fade-out');
                     setTimeout(() => {
@@ -835,15 +832,27 @@
                 referralCode,
                 referredBy,
                 activeSub: null,
-                testStartTime: Date.now(), // Démarrage des 24h
+                testStartTime: Date.now(),
                 history: [{type: 'Bonus inscription', amount: 2000, date: new Date().toLocaleString()}]
             };
 
             users.push(newUser);
             localStorage.setItem('bossman_users', JSON.stringify(users));
 
-            requests.push({
+            // Message de bienvenue automatique avec notification pour le nouvel utilisateur
+            messages.push({
                 id: Date.now(),
+                userPhone: phone,
+                userName: 'Admin',
+                sender: 'admin',
+                text: `Bienvenue sur BOSSMAN Mada, ${name} ! 🎉 Votre compte a été créé avec succès et vous avez reçu un bonus de 2 000 Ar. N'hésitez pas à contacter l'administration si vous avez des questions.`,
+                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                read: false
+            });
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+
+            requests.push({
+                id: Date.now() + 1,
                 type: 'Nouvelle Inscription',
                 userName: name,
                 userPhone: phone,
@@ -855,7 +864,7 @@
 
             if(referredBy) {
                 requests.push({
-                    id: Date.now() + 1,
+                    id: Date.now() + 2,
                     type: 'Nouveau Filleul',
                     userName: name,
                     userPhone: phone,
@@ -952,7 +961,7 @@
                 </div>
             `).join('') || '<p class="text-gray-500 text-center py-4">Aucun historique</p>';
 
-            loadUserSupportChat();
+            refreshAdminBadge();
         }
 
         function openModal(id) { 
@@ -978,6 +987,7 @@
             }
             if(id === 'support-chat-modal') {
                 loadUserSupportChat();
+                // Lorsque l'utilisateur ouvre ses notifications/support, on marque les messages admin comme lus (le chiffre disparaît)
                 messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
                 messages.forEach(m => {
                     if(m.userPhone === currentUser.phone && m.sender === 'admin') m.read = true;
@@ -1260,6 +1270,12 @@
             if(code && code.trim() === 'Hasamlegacy') {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('admin-page').classList.remove('hidden');
+                
+                // Lorsque l'admin ouvre son tableau de bord, on marque toutes les requêtes comme vues (le chiffre admin disparaît)
+                requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
+                requests.forEach(r => r.viewed = true);
+                localStorage.setItem('bossman_requests', JSON.stringify(requests));
+
                 loadAdminData();
             } else if(code !== null) {
                 alert('Mot de passe incorrect.');
@@ -1293,6 +1309,10 @@
             messages = JSON.parse(localStorage.getItem('bossman_messages')) || [];
             requests = JSON.parse(localStorage.getItem('bossman_requests')) || [];
             users = JSON.parse(localStorage.getItem('bossman_users')) || [];
+
+            // Marquer les requêtes et les messages utilisateur comme lus/vus lors du chargement de l'admin
+            requests.forEach(r => r.viewed = true);
+            localStorage.setItem('bossman_requests', JSON.stringify(requests));
 
             refreshAdminBadge();
 
@@ -1421,24 +1441,35 @@
                             <button type="button" onclick="handleRequest(${r.id}, 'Valider')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-white font-black text-xs uppercase tracking-wider transition shadow-md">Valider ${r.type === 'Rapport de Bug' ? '(+1000 Ar)' : ''}</button>
                             <button type="button" onclick="handleRequest(${r.id}, 'Refuser')" class="flex-1 bg-red-600 hover:bg-red-500 py-2 rounded-xl text-white font-black text-xs uppercase tracking-wider transition shadow-md">Refuser</button>
                         </div>
+                    ` : r.adminMessage ? `
+                        <div class="text-[10px] bg-red-950/40 border border-red-500/30 p-2 rounded-xl text-red-300 mt-1">
+                            <strong>Motif du refus :</strong> ${r.adminMessage}
+                        </div>
                     ` : ''}
                 </div>
             `).join('') || '<p class="text-gray-500 text-center py-4">Aucune demande</p>';
 
             const supportList = document.getElementById('admin-support-list');
-            supportList.innerHTML = messages.length ? messages.map(m => `
-                <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2 shadow-sm">
-                    <div class="flex justify-between items-center text-[10px] text-gray-400 font-medium">
-                        <span class="font-bold text-white">${m.userName} (${m.userPhone})</span>
-                        <span>${m.date}</span>
+            supportList.innerHTML = messages.length ? messages.map(m => {
+                // Lorsque l'admin regarde les messages, on marque les messages utilisateur comme lus
+                if(m.sender === 'user') m.read = true;
+                return `
+                    <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-2xl space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center text-[10px] text-gray-400 font-medium">
+                            <span class="font-bold text-white">${m.userName} (${m.userPhone})</span>
+                            <span>${m.date}</span>
+                        </div>
+                        <p class="text-gray-200 text-xs bg-gray-950 p-2.5 rounded-xl border border-gray-800">${m.text}</p>
+                        <div class="flex space-x-2 pt-1">
+                            <input type="text" id="admin-reply-${m.id}" placeholder="Répondre..." class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <button type="button" onclick="sendAdminReply('${m.userPhone}', ${m.id})" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition">Répondre</button>
+                        </div>
                     </div>
-                    <p class="text-gray-200 text-xs bg-gray-950 p-2.5 rounded-xl border border-gray-800">${m.text}</p>
-                    <div class="flex space-x-2 pt-1">
-                        <input type="text" id="admin-reply-${m.id}" placeholder="Répondre..." class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                        <button type="button" onclick="sendAdminReply('${m.userPhone}', ${m.id})" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition">Répondre</button>
-                    </div>
-                </div>
-            `).reverse().join('') : '<p class="text-gray-500 text-center py-6">Aucun message de support</p>';
+                `;
+            }).reverse().join('') : '<p class="text-gray-500 text-center py-6">Aucun message de support</p>';
+            
+            localStorage.setItem('bossman_messages', JSON.stringify(messages));
+            refreshAdminBadge();
         }
 
         function sendAdminReply(userPhone, msgId) {
@@ -1500,7 +1531,24 @@
                     }
                 }
             } else {
+                // Si l'admin refuse, on lui demande d'entrer un message de confirmation / motif
+                let refusalMsg = prompt("Entrez le message de confirmation / motif du refus pour l'utilisateur :", "Votre demande a été refusée par l'administration.");
+                if(refusalMsg === null) return; // Annulé
+
                 req.status = 'Refusé (Rouge)';
+                req.adminMessage = refusalMsg;
+
+                // Envoyer automatiquement le message de refus dans le support chat de l'utilisateur avec une notification
+                messages.push({
+                    id: Date.now(),
+                    userPhone: req.userPhone,
+                    userName: 'Admin',
+                    sender: 'admin',
+                    text: `❌ [Demande de ${req.type} Refusée] ${refusalMsg}`,
+                    date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    read: false
+                });
+                localStorage.setItem('bossman_messages', JSON.stringify(messages));
             }
 
             localStorage.setItem('bossman_requests', JSON.stringify(requests));
